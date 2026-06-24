@@ -1,38 +1,94 @@
 # ⚽ Mundial 2026 Predictor
 
-Sistema de predicción estadística para la Copa Mundial de la FIFA 2026 (Canadá · EE. UU. · México).
+Statistical match-prediction engine for the FIFA World Cup 2026 (Canada · USA · Mexico).
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![UI](https://img.shields.io/badge/UI-Streamlit-ff4b4b)
+![Status](https://img.shields.io/badge/status-operational-brightgreen)
 
-> **Modelo:** Poisson bivariado + corrección de Dixon-Coles + componente Elo.
-> **Filosofía:** construir bien, no rápido. Una fase a la vez, reproducible y documentado.
-
----
-
-## ¿Qué hace?
-
-- **Predice partidos individuales:** probabilidades 1X2, marcador más probable (con su %),
-  top-3 de marcadores y *expected goals* (λ) por equipo.
-- **Simula el torneo completo:** motor de fase de grupos con los desempates oficiales FIFA,
-  ranking de mejores terceros y cuadro de eliminatorias (R32 → final) que avanza a medida
-  que se registran resultados reales.
-- **Se evalúa con honestidad:** backtesting temporal con métricas Brier, RPS (ordinal 1X2)
-  y *exact-score hit-rate*, comparando contra una línea base de Elo.
-- **UI interactiva en Streamlit:** predecir partidos, explorar el torneo, ver la fiabilidad
-  del modelo y su estado.
-
-## Stack
-
-Python 3.12 · pandas · numpy · scipy · Streamlit · pytest.
+> **Model:** bivariate Poisson with covariates + Dixon-Coles low-score correction + an Elo component.
+> **Tested:** pytest suite covering the model, Dixon-Coles, validation and the tournament engine.
 
 ---
 
-## Setup
+## What it does
+
+It predicts the outcome of individual World Cup matches — win/draw/loss probabilities, the most likely
+scoreline and expected goals for each team — using a statistical model trained on an expanded corpus of
+international results. It also simulates the full tournament: it builds group tables with the official FIFA
+tie-breakers and advances a knockout bracket (Round of 32 → Final) as real results come in. Everything is
+exposed through an interactive Streamlit app, so a non-technical user can pick two teams and read the
+forecast in seconds.
+
+## Tech stack
+
+| Layer            | Tools                                                        |
+| ---------------- | ----------------------------------------------------------- |
+| Language         | Python 3.12                                                  |
+| Numerics / data  | `pandas`, `numpy`, `scipy` (L-BFGS-B optimization, Poisson)  |
+| Data ingestion   | `requests`, `lxml`, `beautifulsoup4`, `soccerdata`, `country_converter` |
+| UI               | `streamlit`                                                  |
+| Viz / notebooks  | `matplotlib`, `seaborn`, `jupyter`                           |
+| Testing          | `pytest`                                                     |
+
+## Key features
+
+- **Match prediction** — 1X2 probabilities, expected goals (λ) per team, the most probable scoreline with
+  its probability, a top-3 of scorelines, and a *coherent score* guaranteed to agree with the modal 1X2 result.
+- **Regularized bivariate Poisson model** — ridge-penalized attack/defense ratings with host, Elo-diff, xG-diff
+  and squad-value covariates, plus a Dixon-Coles ρ correction for low scores. Trained via L-BFGS-B with an
+  identifiability constraint (Σα = 0).
+- **Tournament engine** — group standings with official FIFA tie-breakers (points → head-to-head → goal
+  difference → goals for → Elo), best-third ranking, and a knockout bracket numbered to the FIFA standard
+  (groups 1–72, R32 73–88, … Final) that updates as actual results are logged.
+- **Honest backtesting** — temporal backtest using **point-in-time Elo** (no look-ahead), scored with Brier,
+  log-loss and RPS, and benchmarked against a pure-Elo baseline and a naive 1/3 baseline.
+- **Hyperparameter tuning** — Leave-One-Tournament-Out cross-validation (LOTO-CV) grid search over
+  `ridge_lambda` and `decay_rate`; best params persisted to `outputs/best_params.json`.
+- **Match props** — separate Poisson models for corners, cards, shots and fouls, tuned with the same LOTO-CV scheme.
+- **Streamlit UI** — four pages: Predict match, Tournament, Model reliability, and Model status.
+
+## Architecture
+
+```
+src/
+  ingestion/    # data download & parsing — numbered scripts 01..12 (run in order)
+  features/     # per-team feature engineering (WC experience, host affinity, upset index)
+  model/        # Poisson/Dixon-Coles model, predictor, training, validation, updater
+  evaluation/   # temporal backtesting and calibration metrics
+  tournament/   # group engine, FIFA tie-breakers, knockout bracket, reports
+  ui/           # Streamlit app (app.py + pages/)
+tests/          # pytest suite (model + tournament)
+data/
+  raw/          # raw downloads (not versioned; reference/ subset is committed)
+  processed/    # consolidated DataFrames (script outputs)
+  features/     # per-team feature tables
+FbrefData/      # FBref CSVs exported manually
+outputs/        # model artifacts (*.pkl, not versioned) + best_params.json
+docs/           # design specs and plans
+notebooks/      # exploration & prototyping
+```
+
+**Model in one line:** for a match between teams *i* and *j*,
+
+```
+log(λ_i) = μ + α_i − β_j + γ·host_i + δ·elo_diff + ε·xg_diff + ζ·log_value_ratio
+```
+
+with the Dixon-Coles τ factor applied to the {0-0, 1-0, 0-1, 1-1} cells.
+
+## Getting started
+
+### Prerequisites
+
+- Python 3.12
+- `git`
+
+### Install
 
 ```bash
-git clone https://github.com/<tu-usuario>/1000BET.git
+git clone https://github.com/<your-user>/1000BET.git
 cd 1000BET
 
 python3 -m venv .venv
@@ -40,83 +96,70 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> **Nota sobre los datos:** `data/raw/` (descargas de StatsBomb, openfootball, martj42…)
-> **no se versiona** por tamaño y licencias de terceros — se regenera con los scripts de
-> `src/ingestion/`. Sí se incluyen los datos de referencia curados a mano
-> (`data/raw/reference/`) y los CSV exportados manualmente de FBref (`FbrefData/`).
+> **Data note:** `data/raw/` (StatsBomb, openfootball, martj42, …) is **not versioned** due to size and
+> third-party licenses — it is regenerated by the `src/ingestion/` scripts. The curated reference data
+> (`data/raw/reference/`) and the manually exported FBref CSVs (`FbrefData/`) **are** committed.
 
-## Uso
+No environment variables or credentials are required — the project reads/writes local CSVs and the data
+sources are open. There is nothing to put in a `.env`.
 
-### Lanzar la UI
+### Run the UI
 
 ```bash
 streamlit run src/ui/app.py
 ```
 
-Páginas disponibles: **🔮 Predecir partido**, **🏆 Torneo**, **📊 Fiabilidad del modelo**
-y **⚙️ Estado del modelo**.
+Pages: **🔮 Predict match**, **🏆 Tournament**, **📊 Model reliability**, **⚙️ Model status**.
 
-### Pipeline de datos y entrenamiento
+### Data pipeline & training
 
-Los scripts de ingesta están numerados por orden de ejecución:
+Ingestion scripts are numbered by execution order:
 
 ```bash
 python src/ingestion/01_data_exploration.py
 python src/ingestion/02_build_reference_data.py
-# ... 03, 04, ... ver src/ingestion/
-python src/model/train.py          # entrena el modelo de goles
+# ... 03, 04, ... see src/ingestion/
+python src/model/train.py          # LOTO-CV grid search + final fit → outputs/poisson_model.pkl
 ```
 
-Los DataFrames intermedios se guardan en `data/processed/` y las features por selección
-en `data/features/`.
+Intermediate DataFrames land in `data/processed/`; per-team features in `data/features/`.
 
-## Estructura
-
-```
-src/
-  ingestion/    # descarga y parsing de datos (scripts numerados 01..12)
-  features/     # ingeniería de features por selección
-  model/        # modelo Poisson/Dixon-Coles, predictor y entrenamiento
-  evaluation/   # backtesting temporal y métricas de calibración
-  tournament/   # motor de grupos, desempates FIFA y cuadro de eliminatorias
-  ui/           # aplicación Streamlit (app.py + pages/)
-tests/          # suite de pytest (modelo + torneo)
-data/
-  raw/          # datos crudos descargados (no versionado; reference/ sí)
-  processed/    # DataFrames consolidados
-  features/     # features por selección
-FbrefData/      # CSV de FBref exportados manualmente
-outputs/        # artefactos del modelo (.pkl no versionados) y best_params.json
-docs/           # specs y planes de diseño
-notebooks/      # exploración y prototipado
-```
-
-## Tests
+### Tests
 
 ```bash
 pytest
 ```
 
-## Documentación interna
+## Screenshots
 
-- `CLAUDE.md` — contexto y convenciones del proyecto.
+_No screenshots yet._ Launch the Streamlit app (`streamlit run src/ui/app.py`) to view the live UI; add
+captures under `docs/` and link them here.
 
-## Convenciones
+## Project conventions
 
-- Columnas en `snake_case` y en inglés.
-- Selecciones identificadas por su código FIFA de 3 letras (`ARG`, `BRA`, `ESP`…).
-- Partidos del mundial identificados como `{year}_{team1}_{team2}`.
+- Column names in `snake_case`, in English.
+- Teams identified by their 3-letter FIFA code (`ARG`, `BRA`, `ESP`, …).
+- World Cup matches identified as `{year}_{team1}_{team2}`.
+- Ingestion scripts numbered by run order (`01_…`, `02_…`).
 
-## Fuentes de datos
+## Data sources
 
 [StatsBomb Open Data](https://github.com/statsbomb/open-data) ·
 [openfootball](https://github.com/openfootball) ·
 [martj42 international results](https://github.com/martj42/international_results) ·
-FBref · estimaciones de valor de plantilla. Cada fuente conserva su licencia original.
+FBref · curated squad-value estimates. Each source keeps its original license.
 
-## Licencia
+## Status
 
-Distribuido bajo la licencia **GNU GPL-3.0**. Ver [`LICENSE`](LICENSE).
+**Operational / maintained.** The model is operative — match prediction, the tournament engine and the
+Streamlit UI are working — and is actively tracking the live 2026 tournament, advancing the bracket as real
+results are recorded.
 
-Los datos de terceros (StatsBomb, FBref, etc.) están sujetos a sus propias licencias
-y no se redistribuyen en este repositorio.
+## License
+
+Distributed under the **GNU GPL-3.0** license. See [`LICENSE`](LICENSE).
+Third-party data (StatsBomb, FBref, etc.) is subject to its own licenses and is not redistributed here.
+
+## Author
+
+**Milton Beltrán** · ALBRAN INDUSTRIES S.A.
