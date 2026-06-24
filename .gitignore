@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ─────────────────────────────────────────────────────────────
+# Editores / SO
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# ─────────────────────────────────────────────────────────────
+# Datos y artefactos del modelo
+# ─────────────────────────────────────────────────────────────
+# data/raw es descargable (StatsBomb, openfootball, martj42, ...) — no se versiona.
+# Se conservan los datos de referencia curados a mano.
+data/raw/*
+!data/raw/reference/
+!data/raw/reference/**
+
+# Artefactos del modelo (regenerables con los scripts de entrenamiento)
+outputs/*.pkl
+*.pkl
+
+# Secretos / configuración local
+.env
+.env.*
+*.local
+
+# ─────────────────────────────────────────────────────────────
+# Notas internas de desarrollo (no se publican)
+# ─────────────────────────────────────────────────────────────
+PHASE.md
+PENDIENTES_MANUALES.md
+mundial2026_predictor_briefing.md
+mundial2026_predictor_session_handoff.md

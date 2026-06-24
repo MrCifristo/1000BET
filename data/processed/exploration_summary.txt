@@ -1,0 +1,58 @@
+======================================================================
+ MUNDIAL 2026 PREDICTOR — Fase 1 / Exploración de datos base
+======================================================================
+
+[HISTÓRICO] partidos: 964
+[HISTÓRICO] mundiales: 22 (rango 1930–2022)
+[HISTÓRICO] selecciones únicas: 84
+
+Partidos por mundial:
+  1930: 18 partidos
+  1934: 17 partidos
+  1938: 18 partidos
+  1950: 22 partidos
+  1954: 26 partidos
+  1958: 35 partidos
+  1962: 32 partidos
+  1966: 32 partidos
+  1970: 32 partidos
+  1974: 38 partidos
+  1978: 38 partidos
+  1982: 52 partidos
+  1986: 52 partidos
+  1990: 52 partidos
+  1994: 52 partidos
+  1998: 64 partidos
+  2002: 64 partidos
+  2006: 64 partidos
+  2010: 64 partidos
+  2014: 64 partidos
+  2018: 64 partidos
+  2022: 64 partidos
+
+[HISTÓRICO] columnas con nulls: 0
+
+Distribución 1X2 (todo el histórico):
+  Away win: 23.4%
+  Draw: 22.2%
+  Home win: 54.4%
+
+Distribución 1X2 (era moderna 1994–2022, 500 partidos):
+  Away win: 32.6%
+  Draw: 23.6%
+  Home win: 43.8%
+
+Goles promedio por partido (histórico): 2.82
+Goles promedio por partido (1994–2022): 2.55
+
+Partidos a tiempo extra: 73 (7.6%)
+Partidos a penales: 35 (3.6%)
+
+======================================================================
+[2026] fixtures cargados: 104
+[2026] grupos: 12 grupos detectados
+[2026] selecciones confirmadas: 48 (esperado: 48)
+[2026] placeholders de bracket sin resolver: 64
+[2026] rango de fechas: 2026-06-11 → 2026-07-19
+
+Primer partido programado: 2026-06-11 — Mexico vs South Africa (Group A, Mexico City)

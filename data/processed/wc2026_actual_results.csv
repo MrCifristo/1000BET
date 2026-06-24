@@ -1,0 +1,17 @@
+match_date,team1_name,team2_name,iso_a,iso_b,host_iso,goals_a,goals_b
+2026-06-11,Mexico,South Africa,MEX,ZAF,MEX,2,0
+2026-06-11,South Korea,Czech Republic,KOR,CZE,MEX,2,1
+2026-06-12,Canada,Bosnia & Herzegovina,CAN,BIH,CAN,1,1
+2026-06-12,USA,Paraguay,USA,PRY,USA,4,1
+2026-06-13,Qatar,Switzerland,QAT,CHE,USA,1,1
+2026-06-13,Australia,Turkey,AUS,TUR,CAN,2,0
+2026-06-13,Brazil,Morocco,BRA,MAR,USA,1,1
+2026-06-13,Haiti,Scotland,HTI,SCO,USA,0,1
+2026-06-14,Sweden,Tunisia,SWE,TUN,MEX,5,1
+2026-06-14,Netherlands,Japan,NLD,JPN,USA,2,2
+2026-06-14,Ivory Coast,Ecuador,CIV,ECU,USA,1,0
+2026-06-14,Germany,Curaçao,DEU,CUW,USA,7,1
+2026-06-15,Iran,New Zealand,IRN,NZL,USA,2,2
+2026-06-15,Belgium,Egypt,BEL,EGY,USA,1,1
+2026-06-15,Saudi Arabia,Uruguay,SAU,URY,USA,1,1
+2026-06-15,Spain,Cape Verde,ESP,CPV,USA,0,0

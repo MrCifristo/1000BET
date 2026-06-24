@@ -1,0 +1,29 @@
+======================================================================
+ Augmentación de matches_historical -> v2
+======================================================================
+Total partidos: 964
+neutral_venue=True: 838 (86.9%)
+Anfitrión jugando como local: 92
+Anfitrión jugando como visitante: 35
+
+Resultado por anfitrión presente vs ausente:
+  Anfitrión presente (126 partidos):
+    Win-rate del anfitrión: 76/126 (60.3%)
+  Anfitrión ausente / neutral (838 partidos):
+    H: 53.3%
+    D: 22.7%
+    A: 24.0%
+
+Time weights muestra (rate=0.05, ref=2022):
+  1930: 0.010
+  1950: 0.027
+  1970: 0.074
+  1990: 0.202
+  1994: 0.247
+  2002: 0.368
+  2014: 0.670
+  2022: 1.000
+
+Aliases aplicados (cantidad de filas con código histórico):
+  CSK -> CZE: 30 apariciones aliasadas
+  DDR -> DEU: 6 apariciones aliasadas

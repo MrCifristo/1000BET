@@ -1,0 +1,49 @@
+openfootball_name,iso_code,country_full,capital,capital_lat,capital_lon,official_languages
+Algeria,DZA,Algeria,Algiers,36.7538,3.0588,Arabic
+Argentina,ARG,Argentina,Buenos Aires,-34.6037,-58.3816,Spanish
+Australia,AUS,Australia,Canberra,-35.2809,149.13,English
+Austria,AUT,Austria,Vienna,48.2082,16.3738,German
+Belgium,BEL,Belgium,Brussels,50.8503,4.3517,Dutch;French;German
+Bosnia & Herzegovina,BIH,Bosnia and Herzegovina,Sarajevo,43.8563,18.4131,Bosnian;Croatian;Serbian
+Brazil,BRA,Brazil,Brasilia,-15.8267,-47.9218,Portuguese
+Canada,CAN,Canada,Ottawa,45.4215,-75.6972,English;French
+Cape Verde,CPV,Cape Verde,Praia,14.933,-23.5133,Portuguese
+Colombia,COL,Colombia,Bogota,4.711,-74.0721,Spanish
+Croatia,HRV,Croatia,Zagreb,45.815,15.9819,Croatian
+Curaçao,CUW,Curacao,Willemstad,12.1224,-68.8825,Dutch;Papiamentu
+Czech Republic,CZE,Czechia,Prague,50.0755,14.4378,Czech
+DR Congo,COD,DR Congo,Kinshasa,-4.4419,15.2663,French
+Ecuador,ECU,Ecuador,Quito,-0.1807,-78.4678,Spanish
+Egypt,EGY,Egypt,Cairo,30.0444,31.2357,Arabic
+England,ENG,England,London,51.5074,-0.1278,English
+France,FRA,France,Paris,48.8566,2.3522,French
+Germany,DEU,Germany,Berlin,52.52,13.405,German
+Ghana,GHA,Ghana,Accra,5.6037,-0.187,English
+Haiti,HTI,Haiti,Port-au-Prince,18.5944,-72.3074,French;Haitian Creole
+Iran,IRN,Iran,Tehran,35.6892,51.389,Persian
+Iraq,IRQ,Iraq,Baghdad,33.3152,44.3661,Arabic
+Ivory Coast,CIV,Cote d'Ivoire,Yamoussoukro,6.8276,-5.2893,French
+Japan,JPN,Japan,Tokyo,35.6762,139.6503,Japanese
+Jordan,JOR,Jordan,Amman,31.9454,35.9284,Arabic
+Mexico,MEX,Mexico,Mexico City,19.4326,-99.1332,Spanish
+Morocco,MAR,Morocco,Rabat,34.0209,-6.8416,Arabic;Berber
+Netherlands,NLD,Netherlands,Amsterdam,52.3676,4.9041,Dutch
+New Zealand,NZL,New Zealand,Wellington,-41.2865,174.7762,English
+Norway,NOR,Norway,Oslo,59.9139,10.7522,Norwegian
+Panama,PAN,Panama,Panama City,8.9824,-79.5199,Spanish
+Paraguay,PRY,Paraguay,Asuncion,-25.2637,-57.5759,Spanish
+Portugal,PRT,Portugal,Lisbon,38.7223,-9.1393,Portuguese
+Qatar,QAT,Qatar,Doha,25.2854,51.531,Arabic
+Saudi Arabia,SAU,Saudi Arabia,Riyadh,24.7136,46.6753,Arabic
+Scotland,SCO,Scotland,Edinburgh,55.9533,-3.1883,English
+Senegal,SEN,Senegal,Dakar,14.7167,-17.4677,French
+South Africa,ZAF,South Africa,Pretoria,-25.7461,28.1881,English
+South Korea,KOR,South Korea,Seoul,37.5665,126.978,Korean
+Spain,ESP,Spain,Madrid,40.4168,-3.7038,Spanish
+Sweden,SWE,Sweden,Stockholm,59.3293,18.0686,Swedish
+Switzerland,CHE,Switzerland,Bern,46.948,7.4474,German;French;Italian
+Tunisia,TUN,Tunisia,Tunis,36.8065,10.1815,Arabic
+Turkey,TUR,Turkey,Ankara,39.9334,32.8597,Turkish
+USA,USA,United States,Washington,38.9072,-77.0369,English
+Uruguay,URY,Uruguay,Montevideo,-34.9011,-56.1645,Spanish
+Uzbekistan,UZB,Uzbekistan,Tashkent,41.2995,69.2401,Uzbek

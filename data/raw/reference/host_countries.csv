@@ -1,0 +1,4 @@
+iso_code,name,center_city,center_lat,center_lon,primary_languages,neighbors_iso
+USA,United States,New York,40.7128,-74.006,English,CAN;MEX
+CAN,Canada,Toronto,43.6532,-79.3832,English;French,USA
+MEX,Mexico,Mexico City,19.4326,-99.1332,Spanish,USA
