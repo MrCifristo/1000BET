@@ -130,11 +130,6 @@ Intermediate DataFrames land in `data/processed/`; per-team features in `data/fe
 pytest
 ```
 
-## Screenshots
-
-_No screenshots yet._ Launch the Streamlit app (`streamlit run src/ui/app.py`) to view the live UI; add
-captures under `docs/` and link them here.
-
 ## Project conventions
 
 - Column names in `snake_case`, in English.
