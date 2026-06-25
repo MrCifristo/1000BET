@@ -18,7 +18,7 @@ import streamlit as st
 from src.tournament.standings import all_standings, rank_thirds
 from src.tournament.bracket import resolve_bracket
 from src.ui.components import render_score_forecast
-from src.ui.pages.predict import load_team_names, ground_to_host
+from src.ui.views.predict import load_team_names, ground_to_host
 
 ROOT        = Path(__file__).resolve().parents[3]
 RESULTS_CSV = ROOT / "data/processed/wc2026_actual_results.csv"
