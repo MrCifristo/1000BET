@@ -15,7 +15,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-HFA = 100.0  # ventaja de localía en puntos Elo (consistente con 11_elo_rolling.py)
+HFA   = 100.0  # ventaja de localía en puntos Elo (consistente con 11_elo_rolling.py)
+ELO_K = 20.0   # K base para partidos amistosos/de clasificación
 
 ROOT             = Path(__file__).resolve().parents[2]
 ELO_CSV          = ROOT / "data/features/elo_ratings_rolling.csv"
@@ -108,8 +109,8 @@ def log_result(
     p_draw:      float,
     p_away:      float,
     source:      str,
-    elo_a_pre:   float,
-    elo_b_pre:   float,
+    elo_a_pre:   Optional[float] = None,
+    elo_b_pre:   Optional[float] = None,
     props_real:  Optional[dict] = None,
     log_path:    Path = RESULTS_LOG_CSV,
 ) -> float:
@@ -136,8 +137,8 @@ def log_result(
         "host_iso":    host_iso if host_iso else "",
         "goals_a":     goals_a,
         "goals_b":     goals_b,
-        "elo_a_pre":   round(elo_a_pre, 1),
-        "elo_b_pre":   round(elo_b_pre, 1),
+        "elo_a_pre":   round(elo_a_pre, 1) if elo_a_pre is not None else None,
+        "elo_b_pre":   round(elo_b_pre, 1) if elo_b_pre is not None else None,
         "p_home_pred": round(p_home, 4),
         "p_draw_pred": round(p_draw, 4),
         "p_away_pred": round(p_away, 4),

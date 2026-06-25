@@ -194,22 +194,26 @@ def render_bracket(bracket: pd.DataFrame) -> None:
     es = {"Round of 32": "Ronda de 32", "Round of 16": "Octavos",
           "Quarter-final": "Cuartos", "Semi-final": "Semifinales",
           "Match for third place": "3er puesto", "Final": "Final"}
-    for rnd in rounds:
-        sub = bracket[bracket["round"] == rnd]
-        if sub.empty:
-            continue
-        st.markdown(f"**{es[rnd]}**")
-        for r in sub.itertuples(index=False):
-            a = name.get(r.team_a, r.slot_a) if r.team_a else r.slot_a
-            b = name.get(r.team_b, r.slot_b) if r.team_b else r.slot_b
-            if r.winner:
-                w = name.get(r.winner, r.winner)
-                line = f"#{r.match_no} · {a}  vs  {b}  → 🏆 **{w}**"
-            elif r.team_a and r.team_b:
-                line = f"#{r.match_no} · **{a}**  vs  **{b}**  · _{r.match_date}_ (jugable)"
-            else:
-                line = f"#{r.match_no} · {a}  vs  {b}  · _{r.match_date}_"
-            st.write(line)
+    present = [r for r in rounds if not bracket[bracket["round"] == r].empty]
+    if not present:
+        st.info("El cuadro aún no tiene partidos resueltos.")
+        return
+    cols = st.columns(len(present))
+    for col, rnd in zip(cols, present):
+        with col:
+            st.markdown(f"**{es[rnd]}**")
+            for r in bracket[bracket["round"] == rnd].itertuples(index=False):
+                a = name.get(r.team_a, r.slot_a) if r.team_a else r.slot_a
+                b = name.get(r.team_b, r.slot_b) if r.team_b else r.slot_b
+                with st.container(border=True):
+                    if r.winner:
+                        w = name.get(r.winner, r.winner)
+                        st.markdown(f"{'**'+a+'**' if r.winner==r.team_a else a}")
+                        st.markdown(f"{'**'+b+'**' if r.winner==r.team_b else b}")
+                        st.caption(f"🏆 {w}")
+                    else:
+                        st.markdown(a); st.markdown(b)
+                        st.caption(f"#{r.match_no} · {r.match_date}")
 
 
 # ── Página ───────────────────────────────────────────────────────────────────
