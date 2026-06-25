@@ -73,6 +73,23 @@ def show():
         st.dataframe(beta_df, use_container_width=True)
 
     st.divider()
+    st.subheader("Ratings por selección (buscable)")
+    alpha = model.params_["alpha"]
+    beta  = model.params_["beta"]
+    elo   = pd.read_csv(ROOT / "data/features/elo_ratings_rolling.csv")
+    elo_map = dict(zip(elo["iso_code"], elo["elo_rating"]))
+    ratings = pd.DataFrame({
+        "ISO":          list(alpha.keys()),
+        "α (ataque)":   [round(alpha[k], 3) for k in alpha],
+        "β (defensa)":  [round(beta.get(k, float("nan")), 3) for k in alpha],
+        "Elo":          [round(elo_map.get(k, float("nan")), 1) for k in alpha],
+    }).sort_values("α (ataque)", ascending=False)
+    q = st.text_input("Filtrar por ISO (p.ej. ARG, BRA, ESP)", "").strip().upper()
+    if q:
+        ratings = ratings[ratings["ISO"].str.contains(q, na=False)]
+    st.dataframe(ratings, hide_index=True, use_container_width=True)
+
+    st.divider()
 
     # ── Re-entrenamiento manual ───────────────────────────────────────────────
     st.subheader("Re-entrenamiento manual")
