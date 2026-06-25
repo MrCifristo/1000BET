@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from src.evaluation.metrics import logloss_1x2, rps_1x2, hit_rate
+
 ROOT    = Path(__file__).resolve().parents[3]
 LOG_CSV = ROOT / "data/processed/results_log.csv"
 
@@ -39,6 +41,12 @@ def show():
     m3.metric("Referencia naive",      "0.6667")
     mejora = (0.6667 - df["brier_score"].mean()) / 0.6667 * 100
     m4.metric("Mejora vs naive",       f"{mejora:.1f}%", delta=f"{mejora:.1f}%")
+
+    n1, n2, n3, n4 = st.columns(4)
+    n1.metric("Aciertos 1X2", f"{hit_rate(df):.0%}")
+    n2.metric("Log-loss",     f"{logloss_1x2(df):.4f}")
+    n3.metric("RPS",          f"{rps_1x2(df):.4f}")
+    n4.metric("Naive RPS",    "0.2222")
 
     st.divider()
 

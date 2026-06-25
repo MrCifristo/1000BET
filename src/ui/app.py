@@ -12,6 +12,8 @@ if str(_project_root) not in sys.path:
 
 import streamlit as st
 
+from src.ui.views import predict, tournament, dashboard, model_status
+
 st.set_page_config(
     page_title="WC 2026 Predictor",
     page_icon="⚽",
@@ -19,25 +21,19 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+pages = [
+    st.Page(predict.show,      title="Predecir partido",      icon="🔮",
+            url_path="predict", default=True),
+    st.Page(tournament.show,   title="Torneo",                icon="🏆",
+            url_path="tournament"),
+    st.Page(dashboard.show,    title="Fiabilidad del modelo", icon="📊",
+            url_path="reliability"),
+    st.Page(model_status.show, title="Estado del modelo",     icon="⚙️",
+            url_path="status"),
+]
+
 st.sidebar.title("⚽ WC 2026 Predictor")
 st.sidebar.caption("Modelo Poisson bivariado + Dixon-Coles")
 st.sidebar.divider()
 
-page = st.sidebar.radio(
-    "Navegación",
-    ["🔮 Predecir partido", "🏆 Torneo", "📊 Fiabilidad del modelo",
-     "⚙️ Estado del modelo"],
-)
-
-if page == "🔮 Predecir partido":
-    from src.ui.pages.predict import show
-    show()
-elif page == "🏆 Torneo":
-    from src.ui.pages.tournament import show
-    show()
-elif page == "📊 Fiabilidad del modelo":
-    from src.ui.pages.dashboard import show
-    show()
-else:
-    from src.ui.pages.model_status import show
-    show()
+st.navigation(pages).run()

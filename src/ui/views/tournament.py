@@ -17,8 +17,9 @@ import streamlit as st
 
 from src.tournament.standings import all_standings, rank_thirds
 from src.tournament.bracket import resolve_bracket
+from src.tournament.montecarlo import simulate_tournament
 from src.ui.components import render_score_forecast
-from src.ui.pages.predict import load_team_names, ground_to_host
+from src.ui.views.predict import load_team_names, ground_to_host
 
 ROOT        = Path(__file__).resolve().parents[3]
 RESULTS_CSV = ROOT / "data/processed/wc2026_actual_results.csv"
@@ -41,6 +42,13 @@ def load_results() -> pd.DataFrame:
 def load_predictor():
     with open(PREDICTOR, "rb") as f:
         return pickle.load(f)
+
+
+@st.cache_data(show_spinner=False)
+def _simulate(results_csv_mtime: float, n_sims: int):
+    """Cacheado por (mtime del CSV de resultados, n_sims) para invalidar al registrar."""
+    results = load_results()
+    return simulate_tournament(results, load_predictor(), n_sims=n_sims, seed=0)
 
 
 def _played_keys(results: pd.DataFrame) -> set:
@@ -186,22 +194,26 @@ def render_bracket(bracket: pd.DataFrame) -> None:
     es = {"Round of 32": "Ronda de 32", "Round of 16": "Octavos",
           "Quarter-final": "Cuartos", "Semi-final": "Semifinales",
           "Match for third place": "3er puesto", "Final": "Final"}
-    for rnd in rounds:
-        sub = bracket[bracket["round"] == rnd]
-        if sub.empty:
-            continue
-        st.markdown(f"**{es[rnd]}**")
-        for r in sub.itertuples(index=False):
-            a = name.get(r.team_a, r.slot_a) if r.team_a else r.slot_a
-            b = name.get(r.team_b, r.slot_b) if r.team_b else r.slot_b
-            if r.winner:
-                w = name.get(r.winner, r.winner)
-                line = f"#{r.match_no} · {a}  vs  {b}  → 🏆 **{w}**"
-            elif r.team_a and r.team_b:
-                line = f"#{r.match_no} · **{a}**  vs  **{b}**  · _{r.match_date}_ (jugable)"
-            else:
-                line = f"#{r.match_no} · {a}  vs  {b}  · _{r.match_date}_"
-            st.write(line)
+    present = [r for r in rounds if not bracket[bracket["round"] == r].empty]
+    if not present:
+        st.info("El cuadro aún no tiene partidos resueltos.")
+        return
+    cols = st.columns(len(present))
+    for col, rnd in zip(cols, present):
+        with col:
+            st.markdown(f"**{es[rnd]}**")
+            for r in bracket[bracket["round"] == rnd].itertuples(index=False):
+                a = name.get(r.team_a, r.slot_a) if r.team_a else r.slot_a
+                b = name.get(r.team_b, r.slot_b) if r.team_b else r.slot_b
+                with st.container(border=True):
+                    if r.winner:
+                        w = name.get(r.winner, r.winner)
+                        st.markdown(f"{'**'+a+'**' if r.winner==r.team_a else a}")
+                        st.markdown(f"{'**'+b+'**' if r.winner==r.team_b else b}")
+                        st.caption(f"🏆 {w}")
+                    else:
+                        st.markdown(a); st.markdown(b)
+                        st.caption(f"#{r.match_no} · {r.match_date}")
 
 
 # ── Página ───────────────────────────────────────────────────────────────────
@@ -216,13 +228,32 @@ def show():
     n_played = int(results.dropna(subset=["goals_a", "goals_b"]).shape[0])
     st.caption(f"Partidos cargados: **{n_played}** / 104")
 
-    tab_g, tab_t, tab_k = st.tabs(["📋 Grupos", "🥉 Terceros", "🗺️ Cuadro KO"])
+    tab_g, tab_t, tab_k, tab_s = st.tabs(
+        ["📋 Grupos", "🥉 Terceros", "🗺️ Cuadro KO", "🎲 Pronóstico"])
     with tab_g:
         render_groups(tables)
     with tab_t:
         render_thirds(tables)
     with tab_k:
         render_bracket(bracket)
+    with tab_s:
+        st.caption("Simulación Monte Carlo del resto del torneo (muestrea marcadores "
+                   "de grupos y ganadores de eliminatorias con el modelo).")
+        n_sims = st.slider("Número de simulaciones", 500, 5000, 2000, step=500)
+        if st.button("🎲 Simular", type="primary"):
+            mtime = RESULTS_CSV.stat().st_mtime if RESULTS_CSV.exists() else 0.0
+            with st.spinner(f"Simulando {n_sims} torneos..."):
+                sim = _simulate(mtime, n_sims)
+            prob_cols = ["p_advance", "p_r16", "p_qf", "p_sf", "p_final", "p_champion"]
+            disp = sim.copy()
+            disp[prob_cols] = (disp[prob_cols] * 100).round(0)
+            st.dataframe(
+                disp, hide_index=True, use_container_width=True,
+                column_config={
+                    c: st.column_config.ProgressColumn(c, format="%d%%", min_value=0, max_value=100)
+                    for c in prob_cols
+                },
+            )
 
     # ── Interacción: predecir + registrar un fixture jugable ─────────────────
     st.divider()

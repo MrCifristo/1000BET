@@ -1,7 +1,7 @@
 """
 Carga por lotes de resultados reales del Mundial 2026 al modelo.
 
-Replica EXACTAMENTE el flujo de la app (src/ui/pages/predict.py) para cada
+Replica EXACTAMENTE el flujo de la app (src/ui/views/predict.py) para cada
 partido, en orden cronológico:
   1. Predice con el estado ACTUAL del modelo (captura P(1X2), marcador esperado).
   2. Registra el resultado real en results_log.csv (con Elo pre-partido).
