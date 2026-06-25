@@ -112,7 +112,7 @@ def simulate_tournament(results, predictor, n_sims=2000, seed=0):
     def win_prob(a, b, host):
         key = (a, b, host)
         if key not in win_cache:
-            r = predictor.predict_match(a, b, host_iso=host)["result"]
+            r = predictor.model_goals.predict_match(a, b, host_iso=host)
             ph, pa = r["p_home"], r["p_away"]
             win_cache[key] = ph / (ph + pa) if (ph + pa) > 0 else 0.5
         return win_cache[key]

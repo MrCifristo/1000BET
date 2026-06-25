@@ -19,6 +19,7 @@ Los criterios 7–8 no son replicables sin datos de tarjetas/azar; se usa un
 fallback determinista por Elo descendente (documentado) para garantizar un orden
 estable y reproducible.
 """
+from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -29,6 +30,7 @@ MAPPING_CSV  = ROOT / "data/raw/reference/team_codes_mapping.csv"
 ELO_CSV      = ROOT / "data/features/elo_ratings_rolling.csv"
 
 
+@lru_cache(maxsize=None)
 def load_groups(fixtures_csv: Path = FIXTURES_CSV,
                 mapping_csv: Path = MAPPING_CSV) -> tuple[dict, dict]:
     """Devuelve (team_to_group, group_to_teams) usando ISO codes."""
