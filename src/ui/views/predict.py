@@ -137,7 +137,9 @@ def show():
 
     with st.expander("🔥 Mapa de calor de marcadores", expanded=False):
         predictor = load_predictor()
-        st.pyplot(render_score_heatmap(predictor, ia, ib, pred["host_iso"]))
+        fig = render_score_heatmap(predictor, ia, ib, pred["host_iso"])
+        st.pyplot(fig)
+        plt.close(fig)
 
     # ── Mercados Over/Under ─────────────────────────────────────────────────
     st.subheader("📈 Mercados Over / Under")
