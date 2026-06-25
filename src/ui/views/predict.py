@@ -3,6 +3,8 @@ import pickle
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -40,6 +42,26 @@ def ground_to_host(ground: str) -> str:
 def load_predictor():
     with open(ROOT / "outputs/match_predictor.pkl", "rb") as f:
         return pickle.load(f)
+
+
+def render_score_heatmap(predictor, ia: str, ib: str, host_iso, max_g: int = 6):
+    """Heatmap de P(marcador) recortado a [0, max_g] goles por equipo."""
+    matrix = predictor.model_goals.predict_score_matrix(ia, ib, host_iso)
+    m = matrix[: max_g + 1, : max_g + 1]
+    fig, ax = plt.subplots(figsize=(5.2, 4.4))
+    im = ax.imshow(m, cmap="YlOrRd", origin="upper")
+    ax.set_xticks(range(max_g + 1)); ax.set_yticks(range(max_g + 1))
+    ax.set_xlabel(f"Goles {ib}"); ax.set_ylabel(f"Goles {ia}")
+    bi, bj = np.unravel_index(m.argmax(), m.shape)
+    for i in range(max_g + 1):
+        for j in range(max_g + 1):
+            ax.text(j, i, f"{m[i, j]*100:.0f}", ha="center", va="center",
+                    fontsize=7, color="black")
+    ax.add_patch(plt.Rectangle((bj - 0.5, bi - 0.5), 1, 1, fill=False,
+                               edgecolor="#1f77b4", lw=2.5))
+    ax.set_title("Probabilidad por marcador (%)", fontsize=10)
+    fig.tight_layout()
+    return fig
 
 
 def show():
@@ -112,6 +134,10 @@ def show():
     c2.metric("🤝 Empate",     f"{r['result']['p_draw']:.1%}")
     c3.metric(f"🏆 {ib} gana", f"{r['result']['p_away']:.1%}")
     render_score_forecast(r["result"])
+
+    with st.expander("🔥 Mapa de calor de marcadores", expanded=False):
+        predictor = load_predictor()
+        st.pyplot(render_score_heatmap(predictor, ia, ib, pred["host_iso"]))
 
     # ── Mercados Over/Under ─────────────────────────────────────────────────
     st.subheader("📈 Mercados Over / Under")
