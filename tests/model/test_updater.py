@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from pathlib import Path
 
-from src.model.updater import update_elo, log_result, ELO_K
+from src.model.updater import update_elo, log_result
 
 
 def _make_elo_df():
@@ -51,7 +51,7 @@ def test_log_result_creates_file(tmp_path):
         match_date="2026-06-15", iso_a="ARG", iso_b="FRA", host_iso=None,
         goals_a=2, goals_b=1,
         p_home=0.42, p_draw=0.24, p_away=0.34,
-        source="wc2026", log_path=log_path,
+        source="wc2026", elo_a_pre=2100.0, elo_b_pre=2080.0, log_path=log_path,
     )
     assert log_path.exists()
     df = pd.read_csv(log_path)
@@ -69,7 +69,7 @@ def test_log_result_appends(tmp_path):
             match_date=f"2026-06-{15+i}", iso_a="ARG", iso_b="FRA", host_iso=None,
             goals_a=1, goals_b=0,
             p_home=0.5, p_draw=0.25, p_away=0.25,
-            source="friendly", log_path=log_path,
+            source="friendly", elo_a_pre=2100.0, elo_b_pre=2080.0, log_path=log_path,
         )
     df = pd.read_csv(log_path)
     assert len(df) == 3
