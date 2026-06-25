@@ -240,11 +240,14 @@ def show():
             mtime = RESULTS_CSV.stat().st_mtime if RESULTS_CSV.exists() else 0.0
             with st.spinner(f"Simulando {n_sims} torneos..."):
                 sim = _simulate(mtime, n_sims)
+            prob_cols = ["p_advance", "p_r16", "p_qf", "p_sf", "p_final", "p_champion"]
+            disp = sim.copy()
+            disp[prob_cols] = (disp[prob_cols] * 100).round(0)
             st.dataframe(
-                sim, hide_index=True, use_container_width=True,
+                disp, hide_index=True, use_container_width=True,
                 column_config={
-                    c: st.column_config.ProgressColumn(c, format="%.0f%%", min_value=0, max_value=1)
-                    for c in ["p_advance", "p_r16", "p_qf", "p_sf", "p_final", "p_champion"]
+                    c: st.column_config.ProgressColumn(c, format="%d%%", min_value=0, max_value=100)
+                    for c in prob_cols
                 },
             )
 
