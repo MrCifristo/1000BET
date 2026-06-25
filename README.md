@@ -111,6 +111,22 @@ streamlit run src/ui/app.py
 
 Pages: **🔮 Predict match**, **🏆 Tournament**, **📊 Model reliability**, **⚙️ Model status**.
 
+### Deploy (Streamlit Community Cloud)
+
+The repo is deploy-ready: dependencies are pinned in `requirements.txt`, the app
+config lives in `.streamlit/config.toml`, and the trained model artifacts
+(`outputs/match_predictor.pkl`, `outputs/poisson_model.pkl`) are committed so a
+clean clone can predict without retraining.
+
+1. Push to GitHub and go to [share.streamlit.io](https://share.streamlit.io).
+2. **Main file path:** `src/ui/app.py` · **Python version:** 3.12 (Advanced settings).
+3. Deploy. No environment variables or secrets are required.
+
+> **Runtime note:** Streamlit Cloud's filesystem is ephemeral — logging a real
+> result from the UI ("Ingresar resultado real") updates the model in-memory but
+> does **not** persist across reboots. Re-train and commit artifacts to update
+> the deployed model permanently.
+
 ### Data pipeline & training
 
 Ingestion scripts are numbered by execution order:

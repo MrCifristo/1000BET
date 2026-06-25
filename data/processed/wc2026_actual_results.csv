@@ -15,3 +15,35 @@ match_date,team1_name,team2_name,iso_a,iso_b,host_iso,goals_a,goals_b
 2026-06-15,Belgium,Egypt,BEL,EGY,USA,1,1
 2026-06-15,Saudi Arabia,Uruguay,SAU,URY,USA,1,1
 2026-06-15,Spain,Cape Verde,ESP,CPV,USA,0,0
+2026-06-16,France,Senegal,FRA,SEN,USA,3,1
+2026-06-16,Iraq,Norway,IRQ,NOR,USA,1,4
+2026-06-16,Austria,Jordan,AUT,JOR,USA,3,1
+2026-06-16,Argentina,Algeria,ARG,DZA,USA,3,0
+2026-06-17,Portugal,DR Congo,PRT,COD,USA,1,1
+2026-06-17,Uzbekistan,Colombia,UZB,COL,MEX,1,3
+2026-06-17,Ghana,Panama,GHA,PAN,CAN,1,0
+2026-06-17,England,Croatia,ENG,HRV,USA,4,2
+2026-06-18,Czech Republic,South Africa,CZE,ZAF,USA,1,1
+2026-06-18,Mexico,South Korea,MEX,KOR,MEX,1,0
+2026-06-18,Switzerland,Bosnia & Herzegovina,CHE,BIH,USA,4,1
+2026-06-18,Canada,Qatar,CAN,QAT,CAN,6,0
+2026-06-19,Scotland,Morocco,SCO,MAR,USA,0,1
+2026-06-19,Brazil,Haiti,BRA,HTI,USA,3,0
+2026-06-19,USA,Australia,USA,AUS,USA,2,0
+2026-06-19,Turkey,Paraguay,TUR,PRY,USA,0,1
+2026-06-20,Germany,Ivory Coast,DEU,CIV,CAN,2,1
+2026-06-20,Ecuador,Curaçao,ECU,CUW,USA,0,0
+2026-06-20,Netherlands,Sweden,NLD,SWE,USA,5,1
+2026-06-20,Tunisia,Japan,TUN,JPN,MEX,0,4
+2026-06-21,Uruguay,Cape Verde,URY,CPV,USA,2,2
+2026-06-21,Belgium,Iran,BEL,IRN,USA,0,0
+2026-06-21,New Zealand,Egypt,NZL,EGY,CAN,1,3
+2026-06-21,Spain,Saudi Arabia,ESP,SAU,USA,4,0
+2026-06-22,Argentina,Austria,ARG,AUT,USA,2,0
+2026-06-22,France,Iraq,FRA,IRQ,USA,3,0
+2026-06-22,Jordan,Algeria,JOR,DZA,USA,2,1
+2026-06-22,Norway,Senegal,NOR,SEN,USA,3,2
+2026-06-23,Portugal,Uzbekistan,PRT,UZB,USA,5,0
+2026-06-23,Panama,Croatia,PAN,HRV,CAN,0,1
+2026-06-23,England,Ghana,ENG,GHA,USA,0,0
+2026-06-23,Colombia,DR Congo,COL,COD,MEX,1,0

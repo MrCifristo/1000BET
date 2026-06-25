@@ -53,10 +53,16 @@ data/raw/*
 outputs/*.pkl
 *.pkl
 
+# Excepción: los artefactos de producción SÍ se versionan para el deploy.
+# La UI los carga directamente y un clon limpio (Streamlit Cloud) los necesita.
+!outputs/match_predictor.pkl
+!outputs/poisson_model.pkl
+
 # Secretos / configuración local
 .env
 .env.*
 *.local
+.streamlit/secrets.toml
 
 # ─────────────────────────────────────────────────────────────
 # Notas internas de desarrollo (no se publican)

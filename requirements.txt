@@ -1,22 +1,25 @@
+# Versiones pinneadas (==) para reproducibilidad en local y deploy.
+# Probadas con Python 3.12. Actualizar regenerando el entorno y re-fijando.
+
 # Núcleo numérico / datos
-pandas>=2.2.0
-numpy>=1.26.0
+pandas==3.0.3
+numpy==2.5.0
 scipy==1.17.1
 
 # Ingesta y parsing de datos
-requests>=2.31.0
-lxml>=5.0.0
-beautifulsoup4>=4.12.0
-soccerdata>=1.0.0
-country_converter
+requests==2.34.2
+lxml==6.1.1
+beautifulsoup4==4.15.0
+soccerdata==1.9.0
+country_converter==1.3.2
 
 # UI
-streamlit>=1.30.0
+streamlit==1.58.0
 
 # Visualización / notebooks
-matplotlib>=3.8.0
-seaborn>=0.13.0
-jupyter>=1.0.0
+matplotlib==3.11.0
+seaborn==0.13.2
+jupyter==1.1.1
 
 # Tests
-pytest>=8.0.0
+pytest==9.1.1

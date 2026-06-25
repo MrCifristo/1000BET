@@ -1,0 +1,16 @@
+# Configuración de la app Streamlit (local y Streamlit Community Cloud).
+
+[theme]
+# La UI está diseñada en oscuro; lo fijamos para que el deploy no dependa
+# del tema del navegador/SO del visitante.
+base = "dark"
+primaryColor = "#ff4b4b"
+
+[server]
+headless = true
+# Tamaño máximo de subida; la app no recibe uploads grandes.
+maxUploadSize = 50
+
+[browser]
+# No enviar estadísticas de uso a Streamlit.
+gatherUsageStats = false
