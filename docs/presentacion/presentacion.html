@@ -1,0 +1,756 @@
+<title>Python y la predicción del Mundial 2026</title>
+
+<style>
+  /* ============ TOKENS ============ */
+  :root {
+    color-scheme: light dark;
+
+    --font-display: "Helvetica Neue", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    /* light ground (cool, slight teal bias — chosen, not default) */
+    --bg:       #EEF2F4;
+    --bg-2:     #FBFCFD;
+    --bg-3:     #E3EAee;
+    --ink:      #0C1A22;
+    --ink-2:    #2E4450;
+    --ink-dim:  #5D7583;
+    --line:     rgba(12,26,34,0.12);
+    --line-2:   rgba(12,26,34,0.06);
+
+    --green:      #0E8F4C;   /* pitch under floodlights — primary */
+    --green-soft: #0e8f4c1a;
+    --amber:      #D9611F;   /* goals / heat — secondary */
+    --amber-soft: #d9611f1a;
+    --gold:       #B7841A;
+    --blue:       #1E6FD0;   /* python / code nod — used sparingly */
+    --blue-soft:  #1e6fd014;
+
+    --shadow: 0 1px 2px rgba(12,26,34,.06), 0 12px 32px rgba(12,26,34,.10);
+    --radius: 16px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:       #0A121A;
+      --bg-2:     #10202B;
+      --bg-3:     #17303c;
+      --ink:      #E9F2F6;
+      --ink-2:    #C0D2DC;
+      --ink-dim:  #8AA3B1;
+      --line:     rgba(255,255,255,0.11);
+      --line-2:   rgba(255,255,255,0.055);
+
+      --green:      #33D982;
+      --green-soft: #33d9821f;
+      --amber:      #FF9155;
+      --amber-soft: #ff91551f;
+      --gold:       #F3C558;
+      --blue:       #63ABFF;
+      --blue-soft:  #63abff1f;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 46px rgba(0,0,0,.5);
+    }
+  }
+  /* explicit toggle wins in both directions */
+  :root[data-theme="light"] {
+    --bg:#EEF2F4; --bg-2:#FBFCFD; --bg-3:#E3EAee; --ink:#0C1A22; --ink-2:#2E4450;
+    --ink-dim:#5D7583; --line:rgba(12,26,34,0.12); --line-2:rgba(12,26,34,0.06);
+    --green:#0E8F4C; --green-soft:#0e8f4c1a; --amber:#D9611F; --amber-soft:#d9611f1a;
+    --gold:#B7841A; --blue:#1E6FD0; --blue-soft:#1e6fd014;
+    --shadow:0 1px 2px rgba(12,26,34,.06),0 12px 32px rgba(12,26,34,.10);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0A121A; --bg-2:#10202B; --bg-3:#17303c; --ink:#E9F2F6; --ink-2:#C0D2DC;
+    --ink-dim:#8AA3B1; --line:rgba(255,255,255,0.11); --line-2:rgba(255,255,255,0.055);
+    --green:#33D982; --green-soft:#33d9821f; --amber:#FF9155; --amber-soft:#ff91551f;
+    --gold:#F3C558; --blue:#63ABFF; --blue-soft:#63abff1f;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 46px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ============ DECK SHELL ============ */
+  .deck { position: fixed; inset: 0; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    padding: clamp(28px, 4.5vw, 84px);
+    padding-top: clamp(58px, 7vh, 96px);
+    padding-bottom: clamp(56px, 7vh, 92px);
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  .slide.active .anim {
+    animation: rise .6s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .slide.active .anim:nth-child(2){ animation-delay:.06s }
+  .slide.active .anim:nth-child(3){ animation-delay:.12s }
+  .slide.active .anim:nth-child(4){ animation-delay:.18s }
+  .slide.active .anim:nth-child(5){ animation-delay:.24s }
+  @keyframes rise { from { opacity:0; transform: translateY(16px) } to { opacity:1; transform:none } }
+
+  .stage { width: 100%; max-width: 1120px; margin: 0 auto; }
+
+  /* ---- top chrome ---- */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: clamp(46px,6vh,62px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(22px,3.5vw,44px);
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em;
+    color: var(--ink-dim); text-transform: uppercase; z-index: 30;
+    pointer-events: none;
+  }
+  .topbar .brand { display:flex; align-items:center; gap:9px; }
+  .topbar .brand b { color: var(--ink); font-weight: 700; letter-spacing:.14em; }
+  .dot-ball { width:11px; height:11px; border-radius:50%;
+    background: conic-gradient(from 45deg, var(--ink) 0 25%, transparent 0 50%, var(--ink) 0 75%, transparent 0);
+    outline: 1.5px solid var(--ink); outline-offset:-1px; opacity:.85; }
+  .topbar .sec { color: var(--green); }
+
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--green);
+    z-index: 40; transition: width .45s cubic-bezier(.2,.7,.2,1); box-shadow: 0 0 12px var(--green); }
+
+  /* ---- bottom chrome ---- */
+  .botbar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: clamp(48px,6.5vh,64px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(22px,3.5vw,44px); z-index: 30;
+  }
+  .dots { display: flex; gap: 8px; pointer-events: auto; }
+  .dots button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 50%;
+    background: var(--line); cursor: pointer; transition: all .2s; }
+  .dots button:hover { background: var(--ink-dim); }
+  .dots button[aria-current="true"] { background: var(--green); transform: scale(1.3); }
+  .nav { display: flex; gap: 8px; pointer-events: auto; }
+  .nav button, .iconbtn {
+    font-family: var(--font-mono); font-size: 13px;
+    background: var(--bg-2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 9px; width: 38px; height: 34px; cursor: pointer;
+    display: grid; place-items: center; transition: all .18s;
+  }
+  .nav button:hover, .iconbtn:hover { border-color: var(--green); color: var(--green); }
+  .nav button:disabled { opacity: .32; cursor: default; }
+  .tools { position: fixed; top: clamp(9px,1.4vh,14px); right: clamp(22px,3.5vw,44px);
+    display:flex; gap:8px; z-index: 41; pointer-events:auto; }
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+
+  .toast { position: fixed; top: 56px; right: clamp(22px,3.5vw,44px); z-index: 60;
+    max-width: 340px; background: var(--bg-2); color: var(--ink-2);
+    border: 1px solid var(--line); border-left: 3px solid var(--amber);
+    border-radius: 11px; padding: 13px 16px; box-shadow: var(--shadow);
+    font-size: 13.5px; line-height: 1.45; font-family: var(--font-body);
+    opacity: 0; transform: translateY(-8px); pointer-events: none;
+    transition: opacity .25s, transform .25s; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast b { color: var(--ink); }
+
+  /* ============ TYPE SYSTEM ============ */
+  .kicker { font-family: var(--font-mono); font-size: clamp(11px,1.15vw,14px);
+    letter-spacing: .22em; text-transform: uppercase; color: var(--green);
+    display:flex; align-items:center; gap:12px; margin-bottom: clamp(14px,2vh,26px); }
+  .kicker .num { color: var(--ink-dim); }
+  .kicker .rule { flex:1; height:1px; background: var(--line); max-width: 120px; }
+
+  h1.headline { font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(30px, 5.4vw, 68px); line-height: 1.02; letter-spacing: -.02em;
+    margin: 0; text-wrap: balance; color: var(--ink); }
+  h2.headline { font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(26px, 3.9vw, 50px); line-height: 1.05; letter-spacing: -.02em;
+    margin: 0 0 clamp(14px,2.2vh,26px); text-wrap: balance; color: var(--ink); }
+  .lede { font-size: clamp(15px,1.7vw,21px); line-height: 1.5; color: var(--ink-2);
+    max-width: 62ch; }
+  .accent { color: var(--green); }
+  .accent-a { color: var(--amber); }
+  .accent-b { color: var(--blue); }
+
+  /* bullets */
+  .bullets { list-style: none; padding: 0; margin: 0; display: grid; gap: clamp(11px,1.7vh,18px); }
+  .bullets li { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;
+    font-size: clamp(15px,1.65vw,20px); line-height: 1.45; color: var(--ink-2); }
+  .bullets li .mk { margin-top: .35em; width: 12px; height: 12px; flex:none;
+    border-radius: 3px; background: var(--green); transform: rotate(45deg); box-shadow: 0 0 0 4px var(--green-soft); }
+  .bullets li b { color: var(--ink); font-weight: 650; }
+
+  /* grids & cards */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px,3vw,48px); align-items: center; }
+  .cards { display: grid; gap: clamp(12px,1.5vw,18px); }
+  .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: clamp(16px,1.7vw,24px); box-shadow: var(--shadow); }
+  .card h3 { font-family: var(--font-display); font-weight:750; margin:0 0 6px;
+    font-size: clamp(16px,1.55vw,20px); letter-spacing:-.01em; }
+  .card p { margin:0; color: var(--ink-dim); font-size: clamp(13px,1.25vw,15.5px); line-height:1.4; }
+  .card .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing:.12em;
+    text-transform: uppercase; color: var(--amber); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { font-family: var(--font-mono); font-size: clamp(11px,1.15vw,13.5px);
+    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg-2); color: var(--ink-2); letter-spacing:.02em; }
+  .chip.g { color: var(--green); border-color: color-mix(in srgb, var(--green) 40%, var(--line)); background: var(--green-soft); }
+  .chip.a { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 40%, var(--line)); background: var(--amber-soft); }
+  .chip.b { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 40%, var(--line)); background: var(--blue-soft); }
+
+  /* spec sheet (slide 2) */
+  .spec { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; background: var(--bg-2); box-shadow: var(--shadow); }
+  .spec .row { display: grid; grid-template-columns: 40% 1fr; align-items: center;
+    padding: clamp(11px,1.55vh,17px) clamp(16px,1.8vw,24px); border-top: 1px solid var(--line-2); }
+  .spec .row:first-child { border-top: 0; }
+  .spec .k { font-family: var(--font-mono); font-size: clamp(11px,1.15vw,13px);
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+  .spec .v { font-size: clamp(14px,1.4vw,18px); color: var(--ink); font-weight: 600; }
+  .spec .v small { display:block; font-weight:400; color: var(--ink-dim); font-size:.8em; margin-top:2px; letter-spacing:0; }
+
+  /* timeline (slide 3) */
+  .timeline { position: relative; margin-top: clamp(18px,3vh,40px); padding-top: 6px; }
+  .timeline .track { position:absolute; left:0; right:0; top: 20px; height:2px; background: var(--line); }
+  .timeline .track i { position:absolute; left:0; top:0; height:2px; background: linear-gradient(90deg,var(--green),var(--amber)); width:100%;
+    transform-origin:left; }
+  .tl-nodes { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+  .tl { text-align: left; padding-right: 10px; }
+  .tl .pin { width: 14px; height:14px; border-radius:50%; background: var(--bg); border: 3px solid var(--green); margin-bottom: 16px; }
+  .tl:nth-child(n+4) .pin { border-color: var(--amber); }
+  .tl .yr { font-family: var(--font-mono); font-weight:700; font-size: clamp(15px,1.7vw,22px); color: var(--ink); letter-spacing:-.01em; }
+  .tl .lb { font-size: clamp(12px,1.2vw,14.5px); color: var(--ink-dim); line-height:1.35; margin-top:4px; max-width: 15ch; }
+
+  /* ML diagram (slide 5) */
+  .eqbox { border: 1px dashed var(--line); border-radius: var(--radius); padding: clamp(16px,2vw,26px);
+    background: var(--bg-2); }
+  .eqbox .lab { font-family: var(--font-mono); font-size: 11.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--ink-dim); margin-bottom: 12px; }
+  .eqline { display:flex; flex-wrap:wrap; align-items:center; gap: 10px; font-family: var(--font-display);
+    font-weight: 750; font-size: clamp(16px,2vw,26px); letter-spacing:-.01em; }
+  .eqline .t { padding: 4px 12px; border-radius: 10px; background: var(--bg-3); }
+  .eqline .op { color: var(--ink-dim); font-family: var(--font-mono); font-weight: 400; }
+  .eqline .out { background: var(--green-soft); color: var(--green); }
+  .eqbox.flip .eqline .out { background: var(--amber-soft); color: var(--amber); }
+
+  /* formula (slide 7) */
+  .formula { font-family: var(--font-mono); font-size: clamp(15px,2.05vw,27px);
+    line-height: 1.8; background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: clamp(18px,2.4vw,32px); box-shadow: var(--shadow);
+    overflow-x: auto; white-space: nowrap; }
+  .tk { padding: 2px 7px; border-radius: 7px; font-weight: 600; }
+  .tk-l { background: var(--green-soft); color: var(--green); }
+  .tk-a { background: var(--amber-soft); color: var(--amber); }
+  .tk-b { background: var(--blue-soft); color: var(--blue); }
+  .tk-mu{ background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold); }
+  .legend { display:grid; gap: 9px; margin-top: clamp(14px,2vh,22px); }
+  .legend div { display:flex; align-items:baseline; gap: 11px; font-size: clamp(12.5px,1.3vw,16px); color: var(--ink-2); }
+  .legend .sw { font-family: var(--font-mono); font-weight:700; padding:1px 7px; border-radius:6px; flex:none; }
+
+  /* poisson bars */
+  .pois { display:flex; align-items:flex-end; gap: clamp(5px,.9vw,11px); height: clamp(120px,20vh,190px);
+    padding-top: 6px; }
+  .pois .b { flex:1; background: linear-gradient(180deg, var(--amber), color-mix(in srgb,var(--amber) 55%, transparent));
+    border-radius: 6px 6px 0 0; position: relative; min-height: 3px; transition: height .6s cubic-bezier(.2,.7,.2,1); }
+  .pois .b span { position:absolute; top:-20px; left:0; right:0; text-align:center;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim); }
+  .pois .b em { position:absolute; bottom:-22px; left:0; right:0; text-align:center;
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); font-style: normal; }
+
+  /* heatmap (slide 9) */
+  .hm-wrap { display:inline-grid; gap: 3px; }
+  .hm-grid { display:grid; gap: 3px; }
+  .hm-cell { width: clamp(26px,3.4vw,44px); height: clamp(26px,3.4vw,44px); border-radius: 6px;
+    display:grid; place-items:center; font-family: var(--font-mono); font-size: clamp(9px,1vw,12px);
+    color: #10202B; font-weight: 600; }
+  .hm-cell.peak { outline: 2.5px solid var(--green); outline-offset: 1px; }
+  .hm-axis { font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim); letter-spacing:.08em; }
+
+  /* app mock 1x2 */
+  .odds { display:grid; gap: 12px; }
+  .odds .r { display:grid; grid-template-columns: 70px 1fr 52px; align-items:center; gap: 12px; }
+  .odds .nm { font-family: var(--font-mono); font-size: 13px; color: var(--ink-2); }
+  .odds .bar { height: 14px; border-radius: 999px; background: var(--bg-3); overflow:hidden; }
+  .odds .bar i { display:block; height:100%; border-radius:999px; }
+  .odds .pct { font-family: var(--font-mono); font-weight:700; text-align:right; font-variant-numeric: tabular-nums; }
+
+  /* generic small note */
+  .note { font-family: var(--font-mono); font-size: clamp(10.5px,1.1vw,12.5px);
+    color: var(--ink-dim); letter-spacing: .02em; margin-top: clamp(10px,1.6vh,18px); }
+  .big-cue { font-family: var(--font-display); font-weight: 800; letter-spacing:-.01em;
+    font-size: clamp(20px,2.6vw,34px); color: var(--green); }
+
+  /* title slide */
+  #titlebg { position:absolute; inset:0; z-index:0; opacity:.5; }
+  .title-wrap { position: relative; z-index: 1; }
+  .title-tag { display:inline-flex; align-items:center; gap:10px; font-family: var(--font-mono);
+    font-size: clamp(11px,1.2vw,14px); letter-spacing:.16em; text-transform:uppercase; color: var(--green);
+    border:1px solid color-mix(in srgb,var(--green) 40%, var(--line)); background: var(--green-soft);
+    padding: 8px 15px; border-radius: 999px; margin-bottom: clamp(20px,3vh,34px); }
+  .title-sub { margin-top: clamp(18px,2.6vh,30px); font-size: clamp(15px,1.9vw,23px); color: var(--ink-2); max-width: 40ch; line-height:1.45; }
+  .author { margin-top: clamp(24px,4vh,44px); display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .author .who { font-weight:700; color: var(--ink); font-size: clamp(14px,1.5vw,18px); }
+  .author .cls { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-dim); letter-spacing:.08em; }
+  .vs-mark { font-family: var(--font-mono); color: var(--amber); }
+
+  .recap { display:grid; grid-template-columns: repeat(3,1fr); gap: clamp(14px,2vw,26px); margin: clamp(20px,3vh,36px) 0; }
+  .recap .p { border-top: 2px solid var(--green); padding-top: 14px; }
+  .recap .p .n { font-family: var(--font-mono); color: var(--green); font-size: 13px; letter-spacing:.1em; }
+  .recap .p h4 { font-family: var(--font-display); margin: 8px 0 6px; font-size: clamp(15px,1.6vw,21px); font-weight:750; letter-spacing:-.01em; }
+  .recap .p p { margin:0; color: var(--ink-dim); font-size: clamp(12.5px,1.25vw,15px); line-height:1.4; }
+  .recap .p:nth-child(2){ border-color: var(--amber); }
+  .recap .p:nth-child(2) .n{ color: var(--amber); }
+  .recap .p:nth-child(3){ border-color: var(--blue); }
+  .recap .p:nth-child(3) .n{ color: var(--blue); }
+
+  @media (max-width: 760px) {
+    .cols { grid-template-columns: 1fr; gap: 20px; }
+    .recap { grid-template-columns: 1fr; }
+    .tl-nodes { grid-template-columns: repeat(3,1fr); row-gap: 22px; }
+    .timeline .track { display:none; }
+    .hint-text { display:none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active .anim { animation: none !important; }
+    .pois .b { transition: none; }
+    .progress { transition: none; }
+  }
+</style>
+
+<div class="progress" id="progress"></div>
+
+<div class="topbar">
+  <div class="brand"><span class="dot-ball"></span> <b>WC 2026 · PY</b> <span class="sec" id="secLabel"></span></div>
+  <div id="counter">01 / 10</div>
+</div>
+
+<div class="tools">
+  <button class="iconbtn" id="fsBtn" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · TITLE -->
+  <section class="slide" data-sec="Apertura">
+    <canvas id="titlebg" aria-hidden="true"></canvas>
+    <div class="stage title-wrap">
+      <div class="title-tag anim"><span class="dot-ball"></span> Evolution of Computing</div>
+      <h1 class="headline anim">Python y la predicción<br>del <span class="accent">Mundial 2026</span></h1>
+      <p class="title-sub anim">¿Se puede predecir un partido de fútbol? No con certeza — pero sí con <b>probabilidades</b>. Y la herramienta es Python.</p>
+      <div class="author anim">
+        <span class="who">Milton Beltrán</span>
+        <span class="cls">MODELO POISSON · DIXON-COLES · ELO</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · QUÉ ES PYTHON -->
+  <section class="slide" data-sec="El lenguaje">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">01</span><span class="rule"></span> El lenguaje</div>
+      <div class="cols">
+        <div>
+          <h2 class="headline anim">¿Qué es Python?</h2>
+          <p class="lede anim">Un lenguaje <b>de propósito general y multiparadigma</b>, diseñado para que el código sea fácil de leer y escribir por humanos. Su ficha técnica, término por término →</p>
+          <div class="chips anim" style="margin-top:22px">
+            <span class="chip g">legible</span>
+            <span class="chip g">rápido de prototipar</span>
+            <span class="chip b">#1 en ciencia de datos</span>
+          </div>
+        </div>
+        <div class="spec anim">
+          <div class="row"><span class="k">Nivel</span><span class="v">Alto <small>hablas "humano", no máquina</small></span></div>
+          <div class="row"><span class="k">Ejecución</span><span class="v">Interpretado <small>se corre al momento — bytecode + máquina virtual, no un .exe</small></span></div>
+          <div class="row"><span class="k">Tipado</span><span class="v">Dinámico y fuerte <small>no declaras tipos, pero no los mezcla a escondidas</small></span></div>
+          <div class="row"><span class="k">Paradigmas</span><span class="v">Estructurado · POO · funcional</span></div>
+          <div class="row"><span class="k">Memoria</span><span class="v">Automática <small>recolector de basura</small></span></div>
+          <div class="row"><span class="k">Alcance</span><span class="v">Multiplataforma · código abierto</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · HISTORIA -->
+  <section class="slide" data-sec="Historia">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">02</span><span class="rule"></span> Historia</div>
+      <h2 class="headline anim">Un proyecto de Navidad que conquistó la IA</h2>
+      <p class="lede anim">Su superpoder nunca fue la velocidad, sino ser <b>fácil de leer</b> — eso lo volvió el idioma de la ciencia de datos.</p>
+      <div class="timeline anim">
+        <div class="track"><i></i></div>
+        <div class="tl-nodes">
+          <div class="tl"><div class="pin"></div><div class="yr">1989</div><div class="lb">Guido van Rossum lo empieza en Ámsterdam</div></div>
+          <div class="tl"><div class="pin"></div><div class="yr">1991</div><div class="lb">Primera versión pública (0.9.0)</div></div>
+          <div class="tl"><div class="pin"></div><div class="yr">2000</div><div class="lb">Python 2 — se populariza</div></div>
+          <div class="tl"><div class="pin"></div><div class="yr">2008</div><div class="lb">Python 3 mejora rompiendo compatibilidad</div></div>
+          <div class="tl"><div class="pin"></div><div class="yr">2018</div><div class="lb">Guido deja de ser "dictador benévolo"</div></div>
+          <div class="tl"><div class="pin"></div><div class="yr">2020</div><div class="lb">Fin de Python 2 — hoy "Python" es Python 3</div></div>
+        </div>
+      </div>
+      <p class="note anim">Se llama Python por <b>Monty Python</b>, no por la serpiente.</p>
+    </div>
+  </section>
+
+  <!-- 4 · DATOS Y ESTADÍSTICA -->
+  <section class="slide" data-sec="Datos y estadística">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">03</span><span class="rule"></span> Datos y estadística</div>
+      <h2 class="headline anim">Su fuerza es el ecosistema</h2>
+      <p class="lede anim">Python solo es lento — pero sus librerías están escritas por dentro en C. Tú escribes código simple; la máquina hace los números rápido. <b>Mi proyecto se construye sobre estas cuatro.</b></p>
+      <div class="cards anim" style="grid-template-columns:repeat(4,1fr); margin-top: clamp(16px,2.4vh,30px)">
+        <div class="card"><span class="tag">tablas</span><h3>pandas</h3><p>Datos gigantes como una hoja de Excel programable.</p></div>
+        <div class="card"><span class="tag">números</span><h3>NumPy</h3><p>Arreglos rápidos y vectorizados: millones de operaciones de golpe.</p></div>
+        <div class="card"><span class="tag">matemática</span><h3>SciPy</h3><p>La distribución de Poisson y el optimizador que <b>entrena</b> el modelo.</p></div>
+        <div class="card"><span class="tag">visual</span><h3>matplotlib</h3><p>Gráficas y mapas de calor para leer los resultados.</p></div>
+      </div>
+      <div class="chips anim" style="margin-top: clamp(16px,2.4vh,26px)">
+        <span class="chip">Netflix</span><span class="chip">Instagram</span><span class="chip">ChatGPT</span>
+        <span class="chip">bancos</span><span class="chip a">1ª imagen de un agujero negro</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · MACHINE LEARNING -->
+  <section class="slide" data-sec="Machine Learning">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">04</span><span class="rule"></span> Machine Learning</div>
+      <h2 class="headline anim">Aprender reglas, no programarlas</h2>
+      <div class="cols" style="align-items:stretch">
+        <div class="eqbox anim">
+          <div class="lab">Programación clásica</div>
+          <div class="eqline"><span class="t">Reglas</span><span class="op">+</span><span class="t">Datos</span><span class="op">→</span><span class="t out">Respuestas</span></div>
+          <p class="card p" style="margin-top:16px; color:var(--ink-dim)">Yo escribo las reglas a mano.</p>
+        </div>
+        <div class="eqbox flip anim">
+          <div class="lab" style="color:var(--amber)">Machine Learning</div>
+          <div class="eqline"><span class="t">Datos</span><span class="op">+</span><span class="t">Respuestas</span><span class="op">→</span><span class="t out">Reglas</span></div>
+          <p class="card p" style="margin-top:16px; color:var(--ink-dim)">La máquina descubre las reglas sola. Como un niño que aprende qué es una manzana <b>viendo muchas</b>, no leyendo una definición.</p>
+        </div>
+      </div>
+      <div style="margin-top: clamp(18px,2.6vh,30px)">
+        <p class="note anim" style="margin-bottom:12px">Por qué Python domina el ML:</p>
+        <div class="chips anim">
+          <span class="chip g">el ecosistema numérico ya existía</span>
+          <span class="chip b">scikit-learn · TensorFlow · PyTorch</span>
+          <span class="chip a">"Python orquesta, la GPU ejecuta"</span>
+          <span class="chip">fácil de investigar</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · MI PROYECTO -->
+  <section class="slide" data-sec="El proyecto">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">05</span><span class="rule"></span> El proyecto</div>
+      <h2 class="headline anim">Predictor del Mundial 2026</h2>
+      <p class="lede anim">Elige dos selecciones y el sistema calcula la predicción en milisegundos — y simula el torneo completo. Todo en Python, de los datos a la app.</p>
+      <div class="cards anim" style="grid-template-columns:repeat(3,1fr); margin-top: clamp(16px,2.4vh,30px)">
+        <div class="card"><span class="tag">predicción</span><h3>1X2 + goles</h3><p>Probabilidad de victoria, empate y derrota, y los goles esperados de cada equipo.</p></div>
+        <div class="card"><span class="tag">marcador</span><h3>Score probable</h3><p>El marcador más probable, un top-3 y mercados de córners, tarjetas, tiros y faltas.</p></div>
+        <div class="card"><span class="tag">torneo</span><h3>Simulación</h3><p>Grupos con desempates FIFA y un cuadro que avanza con resultados reales.</p></div>
+      </div>
+      <div class="cols anim" style="margin-top: clamp(16px,2.4vh,26px); align-items:center">
+        <div class="chips">
+          <span class="chip g">Python 3.12</span><span class="chip">pandas · numpy · scipy</span>
+          <span class="chip b">Streamlit</span><span class="chip">pytest</span>
+        </div>
+        <p class="note" style="margin:0"><b>¿Por qué Python?</b> Un solo lenguaje para descargar, limpiar, entrenar, evaluar y publicar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · CÓMO FUNCIONA -->
+  <section class="slide" data-sec="El modelo">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">06</span><span class="rule"></span> Cómo funciona el modelo</div>
+      <h2 class="headline anim">Todo se reduce a estimar <span class="accent-a">λ</span></h2>
+      <div class="cols" style="align-items:start">
+        <div>
+          <p class="lede anim" style="margin-bottom:18px">Los goles son <b>eventos raros</b>: eso lo describe la distribución de Poisson. λ es los goles esperados de un equipo — con un buen λ, la Poisson calcula la probabilidad de cada marcador.</p>
+          <div class="pois anim" id="poisBars" aria-label="Distribución de Poisson para lambda 1.8"></div>
+          <p class="note anim" style="margin-top:34px">P(goles) para λ = 1.8 &nbsp;·&nbsp; distribución de Poisson</p>
+        </div>
+        <div>
+          <div class="formula anim">log(<span class="tk tk-a">λ</span>) = <span class="tk tk-mu">μ</span> + <span class="tk tk-l">α</span> − <span class="tk tk-l">β</span> + <span class="tk tk-a">host</span> + <span class="tk tk-b">elo</span> + <span class="tk tk-b">xg</span> + <span class="tk tk-b">valor</span></div>
+          <div class="legend anim">
+            <div><span class="sw tk-l">α − β</span> fuerza de ataque menos defensa del rival</div>
+            <div><span class="sw tk-a">host</span> ventaja de jugar como anfitrión</div>
+            <div><span class="sw tk-b">elo·xg·valor</span> ranking, calidad de ocasiones y valor de plantilla</div>
+          </div>
+          <p class="note anim" style="margin-top:18px"><b>Interpretable:</b> ordenar equipos por α da un ranking real de delanteras. + corrección <b>Dixon-Coles</b> para empates apretados (0-0, 1-1).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · CÓMO APRENDE -->
+  <section class="slide" data-sec="Entrenamiento">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">07</span><span class="rule"></span> Cómo aprende y se entrena</div>
+      <h2 class="headline anim">Ajustar hasta explicar el pasado</h2>
+      <div class="cols" style="align-items:start">
+        <ul class="bullets anim">
+          <li><span class="mk"></span><span><b>Aprender</b> = ajustar los parámetros hasta explicar bien miles de partidos reales.</span></li>
+          <li><span class="mk"></span><span>Un <b>optimizador (L-BFGS-B de SciPy)</b> baja el error "cuesta abajo" hasta el mínimo.</span></li>
+          <li><span class="mk"></span><span><b>Regularización</b> para que no memorice rarezas; <b>validación cruzada</b> para elegir lo mejor.</span></li>
+          <li><span class="mk"></span><span>No es una caja negra: es <b>machine learning interpretable</b>.</span></li>
+        </ul>
+        <div class="card anim" id="backtestCard">
+          <span class="tag">la prueba honesta · brier ↓ menor = mejor</span>
+          <h3 style="margin-top:8px">¿De verdad funciona?</h3>
+          <p style="margin-bottom:16px">Se prueba prediciendo Mundiales pasados con datos que el modelo no vio, y se compara contra métodos simples.</p>
+          <div class="odds" id="backtestBars">
+            <!-- filled by JS; falls back to qualitative -->
+          </div>
+          <p class="note" id="backtestNote" style="margin-top:16px">Naive (azar 1/3) = 0.667 · el modelo debe quedar por debajo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · DEMO -->
+  <section class="slide" data-sec="Demostración">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">08</span><span class="rule"></span> Demostración en vivo</div>
+      <div class="cols" style="align-items:center">
+        <div>
+          <h2 class="headline anim">Elige dos equipos.<br>Lee la predicción.</h2>
+          <p class="lede anim">La app de Streamlit convierte todo el modelo en una pantalla simple: probabilidades, goles esperados y un mapa de calor de marcadores.</p>
+          <p class="big-cue anim" style="margin-top:22px">▶ &nbsp;Cambiar a la app en vivo</p>
+          <p class="note anim">ARG vs BRA · ejemplo ilustrativo del formato de salida</p>
+        </div>
+        <div class="card anim" style="display:grid; gap:20px">
+          <div>
+            <div class="hm-axis" style="margin-bottom:10px; display:flex; justify-content:space-between">
+              <span>ARG&nbsp;·&nbsp;BRA</span><span>P(marcador)</span>
+            </div>
+            <div class="odds" id="oddsMock"></div>
+          </div>
+          <div>
+            <div class="hm-axis" style="margin-bottom:8px">Probabilidad por marcador →</div>
+            <div class="hm-wrap"><div class="hm-grid" id="heatmap"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · CIERRE -->
+  <section class="slide" data-sec="Cierre">
+    <div class="stage">
+      <div class="kicker anim"><span class="num">09</span><span class="rule"></span> Conclusiones</div>
+      <h2 class="headline anim">De una idea matemática<br>a una app que funciona</h2>
+      <div class="recap anim">
+        <div class="p"><div class="n">01</div><h4>Un lenguaje para todo</h4><p>Python cubre el recorrido completo de los datos, sin cambiar de herramienta.</p></div>
+        <div class="p"><div class="n">02</div><h4>Aprender de los datos</h4><p>El machine learning descubre las reglas; no se las programa a mano.</p></div>
+        <div class="p"><div class="n">03</div><h4>Estadística interpretable</h4><p>Cada parámetro significa algo real — no es una caja negra.</p></div>
+      </div>
+      <div class="author anim">
+        <span class="who">¡Gracias! &nbsp;¿Preguntas?</span>
+        <span class="cls vs-mark">MILTON BELTRÁN · EVOLUTION OF COMPUTING</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="botbar">
+  <div class="dots" id="dots"></div>
+  <div style="display:flex; align-items:center; gap:16px">
+    <span class="note hint-text" style="margin:0">← → para navegar</span>
+    <div class="nav">
+      <button id="prev" aria-label="Anterior">←</button>
+      <button id="next" aria-label="Siguiente">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var N = slides.length, i = 0;
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var secLabel = document.getElementById('secLabel');
+  var dotsWrap = document.getElementById('dots');
+  var pad = function(n){ return (n<10?'0':'')+n; };
+
+  // dots
+  slides.forEach(function(s, idx){
+    var b = document.createElement('button');
+    b.setAttribute('aria-label','Ir a la diapositiva '+(idx+1));
+    b.addEventListener('click', function(){ go(idx); });
+    dotsWrap.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function go(n){
+    i = Math.max(0, Math.min(N-1, n));
+    slides.forEach(function(s, idx){ s.classList.toggle('active', idx===i); });
+    dots.forEach(function(d, idx){ d.setAttribute('aria-current', idx===i ? 'true':'false'); });
+    counter.textContent = pad(i+1)+' / '+pad(N);
+    progress.style.width = ((i)/(N-1)*100)+'%';
+    secLabel.textContent = '· ' + (slides[i].getAttribute('data-sec')||'');
+    document.getElementById('prev').disabled = (i===0);
+    document.getElementById('next').disabled = (i===N-1);
+  }
+  function next(){ go(i+1); }
+  function prev(){ go(i-1); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ e.preventDefault(); go(0); }
+    else if(e.key==='End'){ e.preventDefault(); go(N-1); }
+    else if(e.key==='f'||e.key==='F'){ e.preventDefault(); toggleFs(); }
+  });
+  // touch swipe
+  var tx=0;
+  document.addEventListener('touchstart', function(e){ tx=e.changedTouches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>60){ dx<0?next():prev(); }
+  }, {passive:true});
+
+  // fullscreen (robust: iframe previews often block it via permissions policy)
+  var toastTimer;
+  function toast(msg){
+    var t=document.getElementById('toast');
+    if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+    t.innerHTML=msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); }, 6000);
+  }
+  function toggleFs(){
+    var el=document.documentElement;
+    var req=el.requestFullscreen||el.webkitRequestFullscreen;
+    var exit=document.exitFullscreen||document.webkitExitFullscreen;
+    var isFs=document.fullscreenElement||document.webkitFullscreenElement;
+    if(isFs){ if(exit) exit.call(document); return; }
+    if(!req){ toast('Tu navegador no permite pantalla completa aquí.'); return; }
+    try {
+      var p=req.call(el);
+      if(p && p.catch){ p.catch(function(){
+        toast('La pantalla completa está <b>bloqueada dentro de la vista previa</b>.<br>Abre el artefacto en su propia pestaña (botón ↗ arriba) y pulsa <b>F</b> o F11.');
+      }); }
+    } catch(e){
+      toast('La pantalla completa está <b>bloqueada dentro de la vista previa</b>.<br>Abre el artefacto en su propia pestaña (botón ↗ arriba) y pulsa <b>F</b> o F11.');
+    }
+  }
+  document.getElementById('fsBtn').addEventListener('click', toggleFs);
+  function syncFsIcon(){ var isFs=document.fullscreenElement||document.webkitFullscreenElement;
+    document.getElementById('fsBtn').textContent = isFs ? '⤢' : '⛶'; }
+  document.addEventListener('fullscreenchange', syncFsIcon);
+  document.addEventListener('webkitfullscreenchange', syncFsIcon);
+
+  /* ---------- math helpers ---------- */
+  function fact(n){ var f=1; for(var k=2;k<=n;k++) f*=k; return f; }
+  function pois(k, lam){ return Math.exp(-lam)*Math.pow(lam,k)/fact(k); }
+
+  /* ---------- Poisson bars (slide 7) ---------- */
+  (function(){
+    var host = document.getElementById('poisBars'); if(!host) return;
+    var lam=1.8, max=6, vals=[], peak=0;
+    for(var k=0;k<=max;k++){ vals.push(pois(k,lam)); if(vals[k]>peak) peak=vals[k]; }
+    vals.forEach(function(v,k){
+      var b=document.createElement('div'); b.className='b';
+      b.innerHTML='<span>'+Math.round(v*100)+'%</span><em>'+k+'</em>';
+      host.appendChild(b);
+      requestAnimationFrame(function(){ b.style.height=(v/peak*100)+'%'; });
+    });
+  })();
+
+  /* ---------- score matrix, 1X2 + heatmap (slide 9) ---------- */
+  var YlOrRd = [[255,255,178],[254,217,118],[254,178,76],[253,141,60],[240,59,32],[189,0,38]];
+  function ramp(t){ // t in 0..1 -> rgb
+    t=Math.max(0,Math.min(1,t)); var x=t*(YlOrRd.length-1); var lo=Math.floor(x); var hi=Math.min(lo+1,YlOrRd.length-1); var f=x-lo;
+    var c=YlOrRd[lo], d=YlOrRd[hi];
+    return 'rgb('+Math.round(c[0]+(d[0]-c[0])*f)+','+Math.round(c[1]+(d[1]-c[1])*f)+','+Math.round(c[2]+(d[2]-c[2])*f)+')';
+  }
+  (function(){
+    var lamA=1.9, lamB=1.05, G=6;
+    var m=[], tot=0, best=0, bi=0, bj=0, pHome=0,pDraw=0,pAway=0;
+    for(var a=0;a<=G;a++){ m[a]=[]; for(var b=0;b<=G;b++){ var p=pois(a,lamA)*pois(b,lamB); m[a][b]=p; tot+=p;
+      if(a>b)pHome+=p; else if(a===b)pDraw+=p; else pAway+=p;
+      if(p>best){best=p;bi=a;bj=b;} } }
+    // heatmap
+    var grid=document.getElementById('heatmap');
+    if(grid){ grid.style.gridTemplateColumns='repeat('+(G+1)+', auto)';
+      for(var a2=0;a2<=G;a2++){ for(var b2=0;b2<=G;b2++){
+        var cell=document.createElement('div'); cell.className='hm-cell';
+        var pr=m[a2][b2]/best; cell.style.background=ramp(pr);
+        var pct=Math.round(m[a2][b2]/tot*100); cell.textContent=pct>=4?pct:'';
+        if(a2===bi&&b2===bj) cell.className+=' peak';
+        grid.appendChild(cell);
+      }}
+    }
+    // 1X2 mock
+    var odds=document.getElementById('oddsMock');
+    if(odds){
+      var rows=[['ARG', pHome/tot, 'var(--green)'],['Empate', pDraw/tot, 'var(--ink-dim)'],['BRA', pAway/tot, 'var(--amber)']];
+      rows.forEach(function(r){
+        var el=document.createElement('div'); el.className='r';
+        el.innerHTML='<span class="nm">'+r[0]+'</span><div class="bar"><i style="width:'+(r[1]*100)+'%; background:'+r[2]+'"></i></div><span class="pct" style="color:'+r[2]+'">'+Math.round(r[1]*100)+'%</span>';
+        odds.appendChild(el);
+      });
+    }
+  })();
+
+  /* ---------- backtest bars (slide 8) — REAL numbers from backtest_temporal.py ----------
+     256 partidos de Mundial 2010–2022, Brier Score (menor = mejor):
+       Modelo 0.5931 · Elo-puro 0.5883 · Naive 0.6667
+     Log-loss: Modelo 0.9999 · Elo-puro 1.2811 · Naive 1.0986  (modelo gana claro)
+     Acierto de marcador exacto: 14.5%                                              */
+  (function(){
+    var BT = {model:0.593, elo:0.588, naive:0.667};
+    var host=document.getElementById('backtestBars'); if(!host) return;
+    var maxV = 0.72;
+    var rows=[['Modelo', BT.model, 'var(--green)'],['Elo-puro', BT.elo, 'var(--blue)'],['Naive (azar)', BT.naive, 'var(--amber)']];
+    rows.forEach(function(r){
+      var el=document.createElement('div'); el.className='r';
+      var w = r[1]/maxV*100;
+      el.innerHTML='<span class="nm">'+r[0]+'</span><div class="bar"><i style="width:'+w+'%; background:'+r[2]+'"></i></div><span class="pct" style="color:'+r[2]+'">'+r[1].toFixed(3)+'</span>';
+      host.appendChild(el);
+    });
+    document.getElementById('backtestNote').innerHTML='256 partidos · Brier ↓ &nbsp;·&nbsp; gana al azar en las 3 métricas y arrasa en <b>log-loss</b> (1.00 vs 1.28) &nbsp;·&nbsp; acierta el <b>marcador exacto 14.5%</b>.';
+  })();
+
+  /* ---------- title background: faint probability grid ---------- */
+  (function(){
+    var cv=document.getElementById('titlebg'); if(!cv) return;
+    var ctx=cv.getContext('2d'), W,H,cells=[], reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+    function resize(){ W=cv.width=cv.offsetWidth*devicePixelRatio; H=cv.height=cv.offsetHeight*devicePixelRatio;
+      var s=Math.max(38,Math.min(66, W/26))*1; build(s); }
+    var grid=[];
+    function build(s){ grid=[]; var cols=Math.ceil(W/s)+1, rows=Math.ceil(H/s)+1;
+      for(var x=0;x<cols;x++){ for(var y=0;y<rows;y++){ grid.push({x:x*s,y:y*s,s:s,ph:Math.random()*6.28,base:Math.random()}); } } }
+    function draw(t){
+      ctx.clearRect(0,0,W,H);
+      var accent = css('--green')||'#33D982';
+      for(var k=0;k<grid.length;k++){ var g=grid[k];
+        var a = reduce ? g.base*0.5 : (0.5+0.5*Math.sin(t/1400+g.ph))*g.base;
+        ctx.globalAlpha = 0.05 + a*0.30;
+        ctx.fillStyle = accent;
+        var pad=g.s*0.16; ctx.beginPath();
+        var r=4; var x=g.x+pad,y=g.y+pad,w=g.s-pad*2,h=g.s-pad*2;
+        ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
+        ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      if(!reduce) requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize', resize);
+    if(reduce) draw(0); else requestAnimationFrame(draw);
+  })();
+
+  go(0);
+})();
+</script>

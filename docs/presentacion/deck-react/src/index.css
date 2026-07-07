@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #141009;
+  color: #efe7d4;
+  font-family: 'Barlow', system-ui, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- retro-tech ground: warm noir glows + halftone + grain ---- */
+.stage-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(52% 48% at 16% 14%, rgba(232, 178, 58, 0.16), transparent 60%),
+    radial-gradient(50% 46% at 86% 84%, rgba(216, 69, 42, 0.14), transparent 62%),
+    radial-gradient(60% 55% at 78% 18%, rgba(79, 176, 163, 0.1), transparent 60%),
+    radial-gradient(95% 95% at 50% 50%, #1a1409 0%, #120e08 72%);
+}
+.stage-bg::after {
+  /* film grain */
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- CRT scanlines ---- */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.16) 0px,
+    rgba(0, 0, 0, 0.16) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 220px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- flat retro panel (NOT a bubble): hard border, sharp corners ---- */
+.glass {
+  background: linear-gradient(180deg, rgba(239, 231, 212, 0.05), rgba(239, 231, 212, 0.018));
+  border: 1px solid rgba(239, 231, 212, 0.16);
+  border-radius: 2px;
+}
+
+.hairline {
+  background: linear-gradient(90deg, transparent, rgba(239, 231, 212, 0.28), transparent);
+}
+
+/* poster gradient text (mustard → red) */
+.text-grad {
+  background: linear-gradient(100deg, #f0c75a 0%, #e8b23a 42%, #d8452a 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tabnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+*:focus-visible {
+  outline: 2px solid #e8b23a;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
