@@ -208,6 +208,185 @@ export function Formula() {
   )
 }
 
+// (CodeBlock / FitCurves / Spectrum added for the expanded Python + ML sections)
+// ============ Code block (syntax-tinted, no deps) ============
+const CODE_RULES = [
+  [/^#.*/, 'text-dim italic'],
+  [/^("[^"]*"|'[^']*')/, 'text-pitch'],
+  [/^\b(def|return|if|elif|else|for|in|is|not|and|or|None|True|False|import|from|as|self|lambda)\b/, 'text-py font-semibold'],
+  [/^\b(np|exp|log)\b/, 'text-goal'],
+  [/^\d+\.?\d*/, 'text-gold'],
+]
+function tokenizeLine(line) {
+  const out = []
+  let i = 0,
+    plain = '',
+    guard = 0
+  const flush = () => {
+    if (plain) {
+      out.push({ t: plain, cls: '' })
+      plain = ''
+    }
+  }
+  while (i < line.length && guard++ < 2000) {
+    const rest = line.slice(i)
+    let hit = null
+    for (const [re, cls] of CODE_RULES) {
+      const m = rest.match(re)
+      if (m && m.index === 0) {
+        hit = [m[0], cls]
+        break
+      }
+    }
+    if (hit) {
+      flush()
+      out.push({ t: hit[0], cls: hit[1] })
+      i += hit[0].length
+    } else {
+      plain += line[i]
+      i += 1
+    }
+  }
+  flush()
+  return out
+}
+export function CodeBlock({ code, emphasize = [], annotations = [] }) {
+  const lines = code.replace(/\n$/, '').split('\n')
+  return (
+    <div className="glass p-5 md:p-7 overflow-x-auto">
+      <div className="font-mono text-[13px] md:text-[19px] leading-relaxed">
+        {lines.map((ln, i) => {
+          const hot = emphasize.includes(i)
+          return (
+            <div
+              key={i}
+              className={`whitespace-pre px-3 -mx-1 ${
+                hot ? 'bg-pitch/10 border-l-2 border-pitch' : 'border-l-2 border-transparent'
+              }`}
+            >
+              {ln === ''
+                ? ' '
+                : tokenizeLine(ln).map((tok, j) => (
+                    <span key={j} className={tok.cls}>
+                      {tok.t}
+                    </span>
+                  ))}
+            </div>
+          )
+        })}
+      </div>
+      {annotations.length > 0 && (
+        <div className="mt-5 grid gap-2 border-t border-white/[0.06] pt-4">
+          {annotations.map((a, i) => (
+            <p key={i} className="font-mono text-[13px] md:text-[16px] text-dim leading-snug">
+              <span className="text-pitch">▸</span> {a}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============ Fit curves (underfit / good / overfit) ============
+export function FitCurves() {
+  const pts = [
+    [10, 50], [22, 40], [34, 45], [46, 30],
+    [58, 39], [70, 27], [82, 35], [92, 24],
+  ]
+  const panels = [
+    { title: 'Subajuste', sub: 'demasiado simple', tone: '#A99A80', d: 'M6,50 L94,32' },
+    { title: 'Buen ajuste', sub: 'aprende el patrón', tone: '#E8B23A', d: 'M6,54 Q50,14 94,28' },
+    {
+      title: 'Sobreajuste',
+      sub: 'memoriza el ruido',
+      tone: '#D8452A',
+      d: 'M10,50 L22,40 L34,45 L46,30 L58,39 L70,27 L82,35 L92,24',
+    },
+  ]
+  return (
+    <div className="grid grid-cols-3 gap-3 md:gap-5">
+      {panels.map((p, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 + i * 0.13, type: 'spring', stiffness: 120, damping: 18 }}
+          className="glass p-3 md:p-5"
+        >
+          <svg viewBox="0 0 100 64" className="w-full">
+            {pts.map(([x, y], k) => (
+              <circle key={k} cx={x} cy={y} r="2.4" fill="#A99A80" opacity="0.5" />
+            ))}
+            <path
+              d={p.d}
+              fill="none"
+              stroke={p.tone}
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div
+            className="mt-2 font-display font-bold text-lg md:text-2xl tracking-tight"
+            style={{ color: p.tone }}
+          >
+            {p.title}
+          </div>
+          <div className="font-mono text-[12px] md:text-[14px] text-dim">{p.sub}</div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// ============ Spectrum (interpretable ↔ black box) ============
+export function Spectrum({ items, left, right }) {
+  return (
+    <div>
+      <div className="flex justify-between font-mono text-[11px] md:text-[15px] uppercase tracking-[0.1em] mb-4">
+        <span className="text-py">{left}</span>
+        <span className="text-goal text-right">{right}</span>
+      </div>
+      <div className="relative pt-1">
+        <div
+          className="absolute left-2 right-2 top-[9px] h-1"
+          style={{ background: 'linear-gradient(90deg,#4FB0A3,#E8B23A,#D8452A)' }}
+        />
+        <div className="grid grid-cols-5 relative">
+          {items.map((it, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1, type: 'spring', stiffness: 140, damping: 18 }}
+              className="flex flex-col items-center text-center px-1"
+            >
+              <span
+                className={`w-4 h-4 rounded-full border-2 ${
+                  it.mine ? 'bg-pitch border-pitch' : 'bg-base border-ink/40'
+                }`}
+              />
+              <span
+                className={`mt-3 font-mono text-[11px] md:text-[15px] leading-tight ${
+                  it.mine ? 'text-pitch font-bold' : 'text-ink/80'
+                }`}
+              >
+                {it.label}
+              </span>
+              {it.mine && (
+                <span className="mt-1 font-mono text-[10px] md:text-[12px] text-pitch uppercase tracking-wide">
+                  mi modelo
+                </span>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ============ ML equation blocks ============
 export function EqBlock({ label, parts, tone = 'l', note }) {
   const outTone = tone === 'a' ? 'bg-goal/15 text-goal' : 'bg-pitch/15 text-pitch'

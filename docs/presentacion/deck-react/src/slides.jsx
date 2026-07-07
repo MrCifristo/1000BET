@@ -1,13 +1,14 @@
-import { Kicker, Item, Chip, Bullet, Panel, Stagger } from './components/ui.jsx'
+import { Kicker, Item, Chip, Panel, Stagger } from './components/ui.jsx'
 import {
   PoissonBars,
   Heatmap,
   Odds,
-  BacktestBars,
   Timeline,
   Formula,
   EqBlock,
-  Pipeline,
+  CodeBlock,
+  FitCurves,
+  Spectrum,
 } from './components/viz.jsx'
 
 // shared bits ---------------------------------------------------------------
@@ -88,10 +89,9 @@ export function TitleSlide() {
 
 // 2 · AGENDA ----------------------------------------------------------------
 const AGENDA = [
-  ['01', 'Qué es Python', 'Qué tipo de lenguaje es, de dónde viene y por qué importa.'],
-  ['02', 'Por qué reina en datos e IA', 'Cómo Python se volvió el idioma de la ciencia y el machine learning.'],
-  ['03', 'Mi proyecto', 'Un sistema que predice partidos del Mundial 2026 con matemáticas.'],
-  ['04', 'Demostración en vivo', 'Elegimos dos equipos y vemos la predicción al instante.'],
+  ['01', 'Python', 'Qué es, cómo se lee su código y por qué reina en datos e IA.'],
+  ['02', 'Machine Learning', 'Cómo una máquina aprende reglas a partir de los datos, no programándolas.'],
+  ['03', 'El proyecto, en vivo', 'Un sistema que predice el Mundial 2026 — visto en una demostración real.'],
 ]
 export function AgendaSlide() {
   return (
@@ -169,6 +169,46 @@ export function PythonSpec() {
           </Panel>
         </Item>
       </div>
+    </Stagger>
+  )
+}
+
+// 3b · REAL CODE ON SCREEN --------------------------------------------------
+const LAMBDA_CODE = `def _lambda(self, iso_att, iso_def, host_iso):
+    p = self.params_                      # parámetros ya aprendidos
+    host = 1.0 if iso_att == host_iso else 0.0
+
+    log_lam = (p["mu"] + p["alpha"][iso_att] - p["beta"][iso_def]
+               + p["gamma"] * host + p["delta"] * elo_diff
+               + p["eps"] * xg_diff)
+    return np.exp(log_lam)                # goles esperados del equipo`
+export function CodeSlide() {
+  return (
+    <Stagger className="w-full max-w-6xl mx-auto">
+      <Kicker num="01 ·">El lenguaje</Kicker>
+      <H2>El código se lee casi solo</H2>
+      <Lede>
+        Un fragmento <b className="text-ink">real</b> de mi proyecto: calcula los goles esperados de
+        un equipo. Aunque no programes, casi se entiende qué hace.
+      </Lede>
+      <Item>
+        <div className="mt-6">
+          <CodeBlock
+            code={LAMBDA_CODE}
+            emphasize={[2, 4]}
+            annotations={[
+              'host = 1.0 si el equipo juega en casa, si no 0.0 — se lee casi como en inglés.',
+              'log_lam suma ataque, defensa, localía y ranking: es exactamente la fórmula del modelo que veremos.',
+            ]}
+          />
+        </div>
+      </Item>
+      <Item>
+        <p className="font-mono text-[14px] md:text-[16px] text-dim mt-5 leading-relaxed">
+          Por dentro, Python traduce esto a un formato intermedio (<b className="text-ink">bytecode</b>
+          ) que ejecuta su máquina virtual, CPython — por eso corre al instante, sin compilar.
+        </p>
+      </Item>
     </Stagger>
   )
 }
@@ -386,115 +426,160 @@ export function MLDailySlide() {
   )
 }
 
-// 10 · PROJECT --------------------------------------------------------------
-export function ProjectSlide() {
+// 11 · LEARNING TYPES -------------------------------------------------------
+export function LearningTypesSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="05">El proyecto</Kicker>
-      <H2>Predictor del Mundial 2026</H2>
-      <Lede>
-        Eliges dos selecciones y el sistema calcula la predicción en un instante — y simula el
-        torneo completo. Todo en Python, de los datos a la app.
-      </Lede>
-      <div className="grid md:grid-cols-3 gap-4 md:gap-5 mt-7">
-        <Card tag="predicción" title="1X2 + goles">
-          Probabilidad de que gane uno, empate o gane el otro, y los goles esperados de cada equipo.
+      <Kicker num="04 ·">Machine Learning</Kicker>
+      <H2>Tres formas de aprender</H2>
+      <Lede>No todo el aprendizaje automático es igual. Se agrupa en tres grandes familias.</Lede>
+      <div className="grid md:grid-cols-3 gap-4 md:gap-5 mt-7 items-stretch">
+        <Item>
+          <Panel className="p-6 md:p-8 h-full border-t-2 border-pitch">
+            <div className="font-mono text-[13px] md:text-[15px] tracking-[0.12em] uppercase text-pitch">
+              supervisado
+            </div>
+            <h3 className="font-display font-bold text-2xl md:text-3xl mt-2 mb-2 tracking-tight">
+              Aprende de ejemplos con respuesta
+            </h3>
+            <p className="text-ink/75 text-[16px] md:text-[20px] leading-snug">
+              Se le dan datos <b className="text-ink">y</b> la respuesta correcta de cada uno. Filtrar
+              spam, predecir precios.
+            </p>
+            <p className="font-mono text-[13px] md:text-[15px] text-pitch mt-4 leading-snug">
+              ▸ aquí cae mi modelo: partidos pasados con su marcador real.
+            </p>
+          </Panel>
+        </Item>
+        <Card tag="no supervisado" title="Encuentra patrones solo">
+          Solo recibe datos, sin respuestas, y descubre estructura oculta. Agrupar clientes
+          parecidos, detectar anomalías.
         </Card>
-        <Card tag="marcador" title="Score probable">
-          El marcador más probable, un top-3 y mercados como córners y tarjetas.
-        </Card>
-        <Card tag="torneo" title="Simulación">
-          Arma los grupos con las reglas oficiales de la FIFA y avanza el cuadro final.
+        <Card tag="por refuerzo" title="Aprende probando">
+          Actúa, recibe premio o castigo, y ajusta su estrategia. Así aprenden AlphaGo o un robot a
+          caminar.
         </Card>
       </div>
-      <Item>
-        <div className="flex flex-wrap gap-2.5 mt-7">
-          <Chip tone="pitch">Python 3.12</Chip>
-          <Chip>pandas · numpy · scipy</Chip>
-          <Chip tone="py">Streamlit</Chip>
-          <Chip>pytest</Chip>
-        </div>
-      </Item>
     </Stagger>
   )
 }
 
-// 11 · PIPELINE -------------------------------------------------------------
-const STEPS = [
-  { tag: '1 · datos', title: 'Historial', desc: 'Miles de partidos internacionales reales.' },
-  { tag: '2 · features', title: 'Características', desc: 'Fuerza, ranking, valor de cada selección.' },
-  { tag: '3 · modelo', title: 'Aprende', desc: 'Ajusta sus parámetros con los datos.' },
-  { tag: '4 · predice', title: 'Probabilidades', desc: 'Calcula el resultado más probable.' },
-  { tag: '5 · app', title: 'Streamlit', desc: 'Lo muestra en una pantalla simple.' },
-]
-export function PipelineSlide() {
+// 12 · OVERFITTING ----------------------------------------------------------
+export function OverfittingSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="05 ·">Cómo encaja todo</Kicker>
-      <H2>De los datos a la predicción</H2>
-      <Lede>Un solo lenguaje recorre todo el camino, paso a paso.</Lede>
+      <Kicker num="04 ·">El reto central</Kicker>
+      <H2>Memorizar no es aprender</H2>
+      <Lede>
+        Un modelo que memoriza el pasado al pie de la letra falla con lo nuevo. La meta real es{' '}
+        <b className="text-ink">generalizar</b>.
+      </Lede>
       <Item>
         <div className="mt-7">
-          <Pipeline steps={STEPS} />
+          <FitCurves />
         </div>
       </Item>
       <Item>
         <p className="font-mono text-[15px] md:text-[17px] text-dim mt-7 leading-relaxed">
-          <b className="text-ink">Los datos vienen de fuentes abiertas</b> de fútbol (StatsBomb,
-          FBref, resultados internacionales). Nada es inventado: todo se aprende del historial real.
+          Por eso <b className="text-ink">separo los datos</b>: entreno con unos partidos y evalúo con
+          otros que el modelo nunca vio. Y le pongo un freno —la regularización— para que no se
+          aferre a las casualidades.
         </p>
       </Item>
     </Stagger>
   )
 }
 
-// 12 · HOW TO READ A PREDICTION --------------------------------------------
-export function ProbabilitySlide() {
+// 13 · CLASSIC vs NEURAL vs LLM ---------------------------------------------
+const SPECTRUM = [
+  { label: 'Poisson · regresión', mine: true },
+  { label: 'Árboles · bosques' },
+  { label: 'Redes neuronales' },
+  { label: 'Deep learning' },
+  { label: 'LLMs · ChatGPT' },
+]
+export function SpectrumSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="06">Antes del modelo</Kicker>
-      <H2>¿Cómo se lee una predicción?</H2>
-      <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-        <div>
-          <Lede>
-            El modelo no dice "ganará Argentina". Dice{' '}
-            <b className="text-ink">"Argentina tiene 63% de probabilidad"</b>.
-          </Lede>
-          <Item>
-            <p className="text-xl md:text-[28px] text-ink/80 leading-relaxed mt-5 max-w-[40ch]">
-              Es decir: si el partido se jugara <b className="text-white">100 veces</b>, ganaría unas
-              63. El favorito <b className="text-white">pierde a menudo</b> — y que eso pase es
-              justamente lo que hace emocionante al fútbol.
-            </p>
-          </Item>
+      <Kicker num="04 ·">El mapa del ML</Kicker>
+      <H2>Del modelo simple al LLM</H2>
+      <Lede>
+        No todo el machine learning es una red neuronal. Hay un espectro, y cada extremo sirve para
+        cosas distintas.
+      </Lede>
+      <Item>
+        <div className="mt-9 mb-7">
+          <Spectrum
+            items={SPECTRUM}
+            left="Interpretable · pocos datos"
+            right="Caja negra · millones de datos"
+          />
         </div>
-        <Item>
-          <Panel className="p-6 md:p-8">
-            <div className="font-mono text-[12px] tracking-[0.12em] uppercase text-dim mb-4">
-              Ejemplo · ARG vs BRA
-            </div>
-            <Odds
-              rows={[
-                { name: 'Gana ARG', value: 0.63, color: '#e8b23a' },
-                { name: 'Empate', value: 0.22, color: '#a99a80' },
-                { name: 'Gana BRA', value: 0.15, color: '#d8452a' },
-              ]}
-            />
-            <p className="font-mono text-[14px] md:text-[16px] text-dim mt-5 leading-relaxed">
-              Las tres probabilidades siempre suman 100%.
-            </p>
-          </Panel>
-        </Item>
-      </div>
+      </Item>
+      <Item>
+        <p className="text-xl md:text-[26px] text-ink/85 leading-relaxed max-w-[62ch]">
+          <b className="text-white">¿Por qué Poisson y no una red?</b> Con miles de partidos —no
+          millones— un modelo interpretable rinde igual o mejor, y puedo{' '}
+          <b className="text-white">explicar cada número</b>. Una red sería una caja negra con más
+          riesgo de sobreajuste.
+        </p>
+      </Item>
     </Stagger>
   )
 }
 
-// 13 · MODEL ----------------------------------------------------------------
+// 14 · PROJECT (repo mapping) -----------------------------------------------
+const REPO_MAP = [
+  ['pandas · numpy', 'datos y características', 'src/ingestion/ · src/features/'],
+  ['scipy', 'Poisson + optimizador', 'src/model/poisson_model.py · train.py'],
+  ['aprendizaje supervisado', 'miles de partidos reales', 'src/model/train.py'],
+  ['generalización', 'prueba sin look-ahead', 'src/evaluation/backtest_temporal.py'],
+  ['ML interpretable', 'Poisson · Dixon-Coles · Elo', 'src/model/'],
+  ['Streamlit', 'la app de la demo', 'src/ui/app.py'],
+]
+export function ProjectSlide() {
+  return (
+    <Stagger className="w-full max-w-6xl mx-auto">
+      <Kicker num="05">El proyecto</Kicker>
+      <H2>Todo esto, en un solo repo</H2>
+      <Lede>
+        Un sistema que predice partidos del Mundial 2026 y simula el torneo. Aquí es donde el Python
+        y el machine learning que vimos <b className="text-ink">cobran vida</b>.
+      </Lede>
+      <Item>
+        <Panel className="mt-7 overflow-hidden">
+          {REPO_MAP.map(([concept, what, path], i) => (
+            <div
+              key={concept}
+              className={`grid grid-cols-[1fr] md:grid-cols-[minmax(0,42%)_1fr] items-baseline gap-1 md:gap-6 px-5 md:px-7 py-3.5 md:py-4 ${
+                i > 0 ? 'border-t border-white/[0.06]' : ''
+              }`}
+            >
+              <div>
+                <span className="font-semibold text-ink text-[17px] md:text-[22px]">{concept}</span>
+                <span className="text-dim text-[14px] md:text-[17px]"> — {what}</span>
+              </div>
+              <span className="font-mono text-py text-[13px] md:text-[17px] break-all md:text-right">
+                {path}
+              </span>
+            </div>
+          ))}
+        </Panel>
+      </Item>
+      <Item>
+        <p className="font-mono text-[15px] md:text-[18px] text-pitch mt-6">
+          ▶ Y ahora lo vemos funcionando.
+        </p>
+      </Item>
+    </Stagger>
+  )
+}
+
+// 15 · MODEL ----------------------------------------------------------------
 export function ModelSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="07">Cómo funciona el modelo</Kicker>
+      <Kicker num="06">Cómo funciona el modelo</Kicker>
       <H2>
         Todo se reduce a estimar <span className="text-goal">λ</span>
       </H2>
@@ -551,62 +636,11 @@ function Legend({ sw, tone, children }) {
   )
 }
 
-// 14 · TRAINING -------------------------------------------------------------
-const BACKTEST = [
-  { name: 'Modelo', value: 0.593, color: '#e8b23a' },
-  { name: 'Elo-puro', value: 0.588, color: '#4fb0a3' },
-  { name: 'Naive (azar)', value: 0.667, color: '#d8452a' },
-]
-export function TrainingSlide() {
-  return (
-    <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="08">Cómo aprende y se entrena</Kicker>
-      <H2>Ajustar hasta explicar el pasado</H2>
-      <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
-        <ul className="grid gap-4 md:gap-5">
-          <Bullet>
-            <b className="text-ink">Aprender</b> = ajustar los números del modelo hasta explicar bien
-            miles de partidos reales.
-          </Bullet>
-          <Bullet>
-            Un <b className="text-ink">optimizador</b> baja el error "cuesta abajo" hasta el mínimo.
-          </Bullet>
-          <Bullet>
-            Se le añade un <b className="text-ink">freno</b> (regularización) para que no memorice
-            casualidades del pasado, y se evalúa en partidos que nunca vio.
-          </Bullet>
-          <Bullet>
-            No es una caja negra: es <b className="text-ink">machine learning interpretable</b>.
-          </Bullet>
-        </ul>
-        <Item>
-          <Panel className="p-6 md:p-8">
-            <div className="font-mono text-[12px] tracking-[0.12em] uppercase text-goal">
-              la prueba honesta · 256 partidos · menor = mejor
-            </div>
-            <h3 className="font-display font-bold text-2xl mt-2 mb-1.5 tracking-tightest">
-              ¿De verdad funciona?
-            </h3>
-            <p className="text-ink/75 text-[17px] md:text-[20px] leading-snug mb-5">
-              Se prueba prediciendo Mundiales pasados con datos que el modelo no había visto.
-            </p>
-            <BacktestBars data={BACKTEST} />
-            <p className="font-mono text-[14px] md:text-[16px] text-dim mt-5 leading-relaxed">
-              Le gana al azar en todas las métricas · acierta el{' '}
-              <b className="text-ink">marcador exacto 14.5%</b> de las veces.
-            </p>
-          </Panel>
-        </Item>
-      </div>
-    </Stagger>
-  )
-}
-
-// 15 · DEMO -----------------------------------------------------------------
+// 16 · DEMO -----------------------------------------------------------------
 export function DemoSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="09">Demostración en vivo</Kicker>
+      <Kicker num="07">Demostración en vivo</Kicker>
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div>
           <H2>
@@ -664,7 +698,7 @@ const RECAP = [
 export function ClosingSlide() {
   return (
     <Stagger className="w-full max-w-6xl mx-auto">
-      <Kicker num="10">Conclusiones</Kicker>
+      <Kicker num="08">Conclusiones</Kicker>
       <H2>
         De una idea matemática
         <br />a una app que funciona
@@ -703,17 +737,18 @@ export const SLIDES = [
   { section: 'Apertura', Comp: TitleSlide },
   { section: 'El plan', Comp: AgendaSlide },
   { section: 'El lenguaje', Comp: PythonSpec },
+  { section: 'El lenguaje', Comp: CodeSlide },
   { section: 'El lenguaje', Comp: InterpretedSlide },
   { section: 'Historia', Comp: HistorySlide },
   { section: 'Usos reales', Comp: UsesSlide },
   { section: 'Datos y estadística', Comp: EcosystemSlide },
   { section: 'Machine Learning', Comp: MLSlide },
   { section: 'Machine Learning', Comp: MLDailySlide },
+  { section: 'Machine Learning', Comp: LearningTypesSlide },
+  { section: 'Machine Learning', Comp: OverfittingSlide },
+  { section: 'Machine Learning', Comp: SpectrumSlide },
   { section: 'El proyecto', Comp: ProjectSlide },
-  { section: 'El proyecto', Comp: PipelineSlide },
-  { section: 'Probabilidades', Comp: ProbabilitySlide },
   { section: 'El modelo', Comp: ModelSlide },
-  { section: 'Entrenamiento', Comp: TrainingSlide },
   { section: 'Demostración', Comp: DemoSlide },
   { section: 'Cierre', Comp: ClosingSlide },
 ]
