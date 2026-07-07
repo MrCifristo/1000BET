@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.tournament.standings import all_standings, rank_thirds
-from src.tournament.bracket import resolve_bracket
+from src.tournament.bracket import bracket_view
 
 ROOT          = Path(__file__).resolve().parents[2]
 RESULTS_CSV   = ROOT / "data/processed/wc2026_actual_results.csv"
@@ -24,7 +24,7 @@ BRACKET_CSV   = ROOT / "data/processed/wc2026_bracket.csv"
 def build_and_save(results_csv: Path = RESULTS_CSV) -> tuple[dict, pd.DataFrame]:
     results = pd.read_csv(results_csv)
     tables  = all_standings(results)
-    bracket = resolve_bracket(results)
+    bracket = bracket_view(results)          # cuadro real, desde partidos jugados
 
     # Persistir standings (long format con grupo + rank)
     rows = []
@@ -63,14 +63,20 @@ def main():
                   f"Pts {t['Pts']} DG {t['GD']:+d} GF {t['GF']}")
 
     print("\n" + "=" * 60)
-    print("ROUND OF 32 (cuadro)")
+    print("CUADRO DE ELIMINATORIAS (rondas jugadas)")
     print("=" * 60)
-    r32 = bracket[bracket["round"] == "Round of 32"]
-    for r in r32.itertuples(index=False):
-        a = r.team_a if r.team_a else r.slot_a
-        b = r.team_b if r.team_b else r.slot_b
-        w = f"  → {r.winner}" if r.winner else ""
-        print(f"  #{r.match_no} {r.match_date}  {a:<14} vs {b:<14}{w}")
+    ko_order = ["Round of 32", "Round of 16", "Quarter-final",
+                "Semi-final", "Match for third place", "Final"]
+    for rnd in ko_order:
+        rows = bracket[bracket["round"] == rnd]
+        if rows.empty:
+            continue
+        print(f"\n{rnd}")
+        for r in rows.itertuples(index=False):
+            a = r.team_a if r.team_a else r.slot_a
+            b = r.team_b if r.team_b else r.slot_b
+            w = f"  → {r.winner}" if r.winner else "  (pendiente)"
+            print(f"  {r.match_date}  {a:<5} vs {b:<5}{w}")
 
     print(f"\nGuardado → {STANDINGS_CSV.relative_to(ROOT)} | "
           f"{BRACKET_CSV.relative_to(ROOT)}")

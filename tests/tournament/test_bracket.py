@@ -3,7 +3,7 @@ import pandas as pd
 
 from src.tournament.standings import load_groups
 from src.tournament.bracket import (
-    parse_knockout, third_slots, resolve_bracket,
+    parse_knockout, third_slots, resolve_bracket, bracket_view,
 )
 
 
@@ -24,11 +24,32 @@ def test_third_slots_son_ocho():
 
 
 def test_resolve_sin_grupos_completos_no_crashea():
-    # Solo unos pocos resultados → ningún grupo completo → KO todo placeholder
-    res = pd.read_csv("data/processed/wc2026_actual_results.csv")
+    # Pocos resultados → ningún grupo completo → KO todo placeholder.
+    # (input sintético, no el CSV real, para no depender del estado del torneo)
+    res = pd.DataFrame(
+        [("MEX", "ZAF", 2, 0), ("KOR", "CZE", 2, 1)],
+        columns=["iso_a", "iso_b", "goals_a", "goals_b"])
     br = resolve_bracket(res)
     assert len(br) == 32
     assert br["team_a"].isna().all() and br["team_b"].isna().all()
+
+
+def test_bracket_view_desde_partidos_jugados():
+    # bracket_view arma cada ronda desde los partidos jugados (por fecha),
+    # resolviendo el ganador por penales cuando hubo empate.
+    res = pd.DataFrame([
+        {"match_date": "2026-06-29", "iso_a": "DEU", "iso_b": "PRY",
+         "goals_a": 1, "goals_b": 1, "pens_a": 3, "pens_b": 4},   # penales → PRY
+        {"match_date": "2026-06-30", "iso_a": "FRA", "iso_b": "SWE",
+         "goals_a": 3, "goals_b": 0, "pens_a": None, "pens_b": None},
+    ])
+    bv = bracket_view(res)
+    r32 = bv[bv["round"] == "Round of 32"]
+    winners = {(r.team_a, r.team_b): r.winner for r in r32.itertuples(index=False)}
+    assert winners[("DEU", "PRY")] == "PRY"     # ganador de penales, no empate
+    assert winners[("FRA", "SWE")] == "FRA"
+    # una ronda sin partidos jugados no aparece
+    assert bv[bv["round"] == "Quarter-final"].empty
 
 
 def _full_group_results() -> pd.DataFrame:

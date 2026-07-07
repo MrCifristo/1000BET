@@ -16,7 +16,7 @@ import pandas as pd
 import streamlit as st
 
 from src.tournament.standings import all_standings, rank_thirds
-from src.tournament.bracket import resolve_bracket
+from src.tournament.bracket import resolve_bracket, bracket_view
 from src.tournament.montecarlo import simulate_tournament
 from src.ui.components import render_score_forecast
 from src.ui.views.predict import load_team_names, ground_to_host
@@ -235,7 +235,7 @@ def show():
     with tab_t:
         render_thirds(tables)
     with tab_k:
-        render_bracket(bracket)
+        render_bracket(bracket_view(results))   # cuadro real desde partidos jugados
     with tab_s:
         st.caption("Simulación Monte Carlo del resto del torneo (muestrea marcadores "
                    "de grupos y ganadores de eliminatorias con el modelo).")

@@ -121,10 +121,10 @@ export function AgendaSlide() {
 
 // 3 · PYTHON — WHAT ---------------------------------------------------------
 const SPEC = [
-  ['Nivel', 'Alto', 'hablas "humano", no el idioma de la máquina'],
-  ['Ejecución', 'Interpretado', 'se corre al momento — no hay que compilarlo primero'],
-  ['Tipado', 'Dinámico y fuerte', 'no declaras tipos, pero no los mezcla a escondidas'],
-  ['Memoria', 'Automática', 'limpia sola lo que ya no se usa'],
+  ['Nivel', 'Alto', 'escribes pensando en el problema, no en el hardware'],
+  ['Ejecución', 'Interpretado', 'se ejecuta al instante, sin compilación previa'],
+  ['Tipado', 'Dinámico y fuerte', 'no declaras el tipo, pero tampoco lo convierte por su cuenta'],
+  ['Memoria', 'Automática', 'gestiona sola la memoria que deja de usarse'],
 ]
 export function PythonSpec() {
   return (
@@ -134,9 +134,9 @@ export function PythonSpec() {
         <div>
           <H2>¿Qué es Python?</H2>
           <Lede>
-            Un <b className="text-ink">lenguaje de programación</b>: el idioma con el que le damos
-            órdenes a una computadora. Python es uno de los más populares del mundo, famoso por ser{' '}
-            <b className="text-ink">fácil de leer</b>.
+            Uno de los lenguajes más usados del mundo. Su rasgo distintivo es la{' '}
+            <b className="text-ink">legibilidad</b>: el código se lee casi como inglés, y eso acorta
+            la distancia entre pensar una idea y ejecutarla.
           </Lede>
           <Item>
             <div className="flex flex-wrap gap-2.5 mt-6">
@@ -179,7 +179,7 @@ export function InterpretedSlide() {
     <Stagger className="w-full max-w-6xl mx-auto">
       <Kicker num="01 ·">Una idea clave</Kicker>
       <H2>Interpretado, no compilado</H2>
-      <Lede>La diferencia, sin tecnicismos: es la forma en que la computadora "entiende" tu código.</Lede>
+      <Lede>Es la forma en que la máquina traduce y ejecuta tu código — y explica por qué Python es tan ágil para experimentar.</Lede>
       <div className="grid md:grid-cols-2 gap-5 md:gap-7 mt-7">
         <Item>
           <Panel className="p-6 md:p-8 h-full">
@@ -193,8 +193,8 @@ export function InterpretedSlide() {
               Traducir el libro entero
             </h3>
             <p className="text-ink/75 text-[17px] md:text-[21px] leading-snug">
-              Se traduce todo el programa a idioma de máquina <b className="text-ink">antes</b> de
-              usarlo. Muy rápido después, pero rígido y con un paso extra.
+              Todo el programa se traduce a código de máquina <b className="text-ink">antes</b> de
+              ejecutarse. Muy veloz al correr, a cambio de un paso previo y menos flexibilidad.
             </p>
           </Panel>
         </Item>
@@ -210,16 +210,16 @@ export function InterpretedSlide() {
               Un intérprete simultáneo
             </h3>
             <p className="text-ink/75 text-[17px] md:text-[21px] leading-snug">
-              Traduce y ejecuta <b className="text-ink">frase por frase</b>, al momento. Escribes y
-              corres al instante — ideal para probar ideas rápido.
+              Traduce y ejecuta <b className="text-ink">instrucción por instrucción</b>, sobre la
+              marcha. Escribes y ves el resultado de inmediato: ideal para iterar.
             </p>
           </Panel>
         </Item>
       </div>
       <Item>
         <p className="font-mono text-[15px] md:text-[17px] text-dim mt-6 leading-relaxed">
-          Por eso Python es perfecto para <b className="text-ink">experimentar</b> — justo lo que se
-          hace al construir un modelo estadístico.
+          Ese ciclo inmediato de escribir, ejecutar y ajustar es exactamente el que exige{' '}
+          <b className="text-ink">construir un modelo estadístico</b>.
         </p>
       </Item>
     </Stagger>
@@ -241,8 +241,8 @@ export function HistorySlide() {
       <Kicker num="02">Historia</Kicker>
       <H2>Un proyecto de Navidad que conquistó la IA</H2>
       <Lede>
-        Empezó como el pasatiempo de una sola persona. Su superpoder nunca fue la velocidad, sino
-        ser <b className="text-ink">fácil de leer</b>.
+        Nació como el proyecto personal de una sola persona. Su ventaja decisiva nunca fue la
+        velocidad, sino la <b className="text-ink">legibilidad</b>.
       </Lede>
       <Item>
         <Timeline nodes={TL} />
@@ -262,7 +262,7 @@ export function UsesSlide() {
     <Stagger className="w-full max-w-6xl mx-auto">
       <Kicker num="03">Usos en el mundo real</Kicker>
       <H2>Python está en lo que usas a diario</H2>
-      <Lede>Aunque no lo veas, probablemente ya interactuaste con Python hoy varias veces.</Lede>
+      <Lede>Aunque no se note, es muy probable que ya hayas usado Python varias veces hoy.</Lede>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mt-7">
         <Card tag="streaming" title="Netflix">
           Decide qué series recomendarte según lo que ves.
@@ -297,15 +297,15 @@ export function EcosystemSlide() {
       <Kicker num="03 ·">Datos y estadística</Kicker>
       <H2>Su fuerza es el ecosistema</H2>
       <Lede>
-        Python trae "cajas de herramientas" (librerías) listas para los números.{' '}
-        <b className="text-ink">Mi proyecto se construye sobre estas cuatro.</b>
+        El verdadero motor de Python son sus <b className="text-ink">librerías</b>: colecciones de
+        herramientas listas para el cálculo. Mi proyecto se apoya en estas cuatro.
       </Lede>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mt-7">
         <Card tag="tablas" title="pandas">
-          Maneja datos gigantes como una hoja de Excel programable.
+          Organiza grandes volúmenes de datos en tablas, como una hoja de cálculo programable.
         </Card>
         <Card tag="números" title="NumPy">
-          Hace millones de cálculos de golpe, a gran velocidad.
+          Ejecuta millones de operaciones numéricas de una sola vez, a gran velocidad.
         </Card>
         <Card tag="matemática" title="SciPy">
           Trae la distribución de Poisson y el motor que <b className="text-ink">entrena</b> el
@@ -361,13 +361,13 @@ export function MLDailySlide() {
           "Porque viste…" en Netflix, Spotify o YouTube.
         </Card>
         <Card tag="clasificar" title="Filtro de spam">
-          Tu correo aprende a separar lo importante de la basura.
+          Tu correo aprende a separar lo relevante del correo no deseado.
         </Card>
         <Card tag="reconocer" title="Desbloqueo facial">
-          Tu teléfono aprende a reconocer tu cara.
+          Tu teléfono aprende a reconocer tu rostro.
         </Card>
         <Card tag="predecir" title="Autocorrector">
-          Adivina la siguiente palabra que vas a escribir.
+          Predice la siguiente palabra que vas a escribir.
         </Card>
       </div>
       <Item>
@@ -572,8 +572,8 @@ export function TrainingSlide() {
             Un <b className="text-ink">optimizador</b> baja el error "cuesta abajo" hasta el mínimo.
           </Bullet>
           <Bullet>
-            Se le pone un <b className="text-ink">freno</b> para que no memorice rarezas, y se prueba
-            en partidos que no vio.
+            Se le añade un <b className="text-ink">freno</b> (regularización) para que no memorice
+            casualidades del pasado, y se evalúa en partidos que nunca vio.
           </Bullet>
           <Bullet>
             No es una caja negra: es <b className="text-ink">machine learning interpretable</b>.

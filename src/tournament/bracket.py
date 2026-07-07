@@ -103,9 +103,11 @@ def assign_thirds(ko: pd.DataFrame, tables: dict) -> dict:
 
 
 def _played_lookup(results: pd.DataFrame) -> dict:
-    """{(frozenset{isoA,isoB}): (winner, loser, goals)} de partidos jugados.
-    Devuelve winner=None en empate (los KO no deberían empatar tras definición)."""
+    """{(frozenset{isoA,isoB}): (winner, loser)} de partidos jugados.
+    En empate tras 90'/prórroga, desempata por penales (columnas pens_a/pens_b)
+    si están registrados; si no, devuelve (None, None)."""
     out = {}
+    has_pens = {"pens_a", "pens_b"} <= set(results.columns)
     played = results.dropna(subset=["goals_a", "goals_b"])
     for r in played.itertuples(index=False):
         a, b, ga, gb = r.iso_a, r.iso_b, int(r.goals_a), int(r.goals_b)
@@ -115,7 +117,12 @@ def _played_lookup(results: pd.DataFrame) -> dict:
         elif gb > ga:
             out[key] = (b, a)
         else:
-            out[key] = (None, None)  # empate sin desempate registrado
+            pa = getattr(r, "pens_a", None) if has_pens else None
+            pb = getattr(r, "pens_b", None) if has_pens else None
+            if pa is not None and pb is not None and pd.notna(pa) and pd.notna(pb) and pa != pb:
+                out[key] = (a, b) if pa > pb else (b, a)  # ganador de penales
+            else:
+                out[key] = (None, None)  # empate sin desempate registrado
     return out
 
 
@@ -171,6 +178,52 @@ def resolve_bracket(results: pd.DataFrame,
                      "slot_a": r.slot_a, "slot_b": r.slot_b,
                      "team_a": ta, "team_b": tb, "winner": winner})
     return pd.DataFrame(rows)
+
+
+def bracket_view(results: pd.DataFrame,
+                 fixtures_csv: Path = FIXTURES_CSV) -> pd.DataFrame:
+    """Cuadro para MOSTRAR, reconstruido desde los partidos realmente jugados.
+
+    A diferencia de `resolve_bracket` (que deriva los cruces de los standings + el
+    cableado de slots del fixture), aquí cada ronda KO se arma con los partidos que
+    de verdad se jugaron —clasificados por su fecha, que no se solapan entre rondas—,
+    con el ganador resuelto por penales (pens_a/pens_b) si hizo falta. Es robusto
+    aunque la asignación de terceros o el cableado del fixture no coincidan con el
+    sorteo real. Solo incluye rondas con partidos jugados; una ronda aparece a medida
+    que se registran sus resultados. Mismo esquema que `resolve_bracket` para que
+    `render_bracket` lo consuma sin cambios.
+    """
+    fix = pd.read_csv(fixtures_csv)
+    ko = fix[fix["round"].isin(KO_ROUNDS)]
+    windows = {rnd: (g["match_date"].min(), g["match_date"].max())
+               for rnd, g in ko.groupby("round")}
+    has_pens = {"pens_a", "pens_b"} <= set(results.columns)
+    played = results.dropna(subset=["goals_a", "goals_b"])
+
+    rows, mno = [], 73
+    for rnd in KO_ROUNDS:                       # en orden: R32 → … → Final
+        lo, hi = windows.get(rnd, (None, None))
+        if lo is None:
+            continue
+        sel = played[(played["match_date"] >= lo) & (played["match_date"] <= hi)]
+        for r in sel.sort_values("match_date", kind="stable").itertuples(index=False):
+            ga, gb = int(r.goals_a), int(r.goals_b)
+            if ga > gb:
+                winner = r.iso_a
+            elif gb > ga:
+                winner = r.iso_b
+            else:                               # empate → desempate por penales
+                pa = getattr(r, "pens_a", None) if has_pens else None
+                pb = getattr(r, "pens_b", None) if has_pens else None
+                winner = None
+                if pa is not None and pb is not None and pd.notna(pa) and pd.notna(pb) and pa != pb:
+                    winner = r.iso_a if pa > pb else r.iso_b
+            rows.append({"match_no": mno, "round": rnd, "match_date": r.match_date,
+                         "ground": "", "slot_a": r.iso_a, "slot_b": r.iso_b,
+                         "team_a": r.iso_a, "team_b": r.iso_b, "winner": winner})
+            mno += 1
+    return pd.DataFrame(rows, columns=["match_no", "round", "match_date", "ground",
+                                       "slot_a", "slot_b", "team_a", "team_b", "winner"])
 
 
 def group_qualifiers_completed(tables: dict) -> dict:
